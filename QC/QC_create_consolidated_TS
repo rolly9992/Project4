@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Feb 21 07:34:58 2025
+
+@author: milo
+"""
+
+#TODO add GEHC back in <<<##verify I did this.. 
+#TODO add calc non blank rows for tickers with 2 line items in the same quarter
+
+from alpha_vantage.timeseries import TimeSeries
+from alpha_vantage.techindicators import TechIndicators
+# from matplotlib.pyplot import figure
+# import matplotlib.pyplot as plt
+import pandas as pd 
+pd.options.mode.copy_on_write = True 
+import numpy as np 
+import time
+import os 
+print(os.getcwd())
+import requests 
+from pandas.core.common import flatten
+import json
+import sys 
+
+# #NOTE: the pandas interpolate method was deprecated in python 3.12 however it reappeared in 3.13. And it works in 3.11 which is what I'm using. 
+# #for this reason I am supressing the futures warning 
+# import warnings
+# #warnings.filterwarnings("ignore", category=DeprecationWarning) 
+# warnings.simplefilter(action='ignore', category=FutureWarning)
+
+dates = ['2022-06-30','2022-09-30','2022-12-30','2023-03-31' ,'2023-06-30']
+sequence = {'2022-06-30':0
+            ,'2022-09-30':1
+            ,'2022-12-30':2
+            ,'2023-03-31':3
+            ,'2023-06-30':4 }
+
+directory = 'data/TimeSeriesAdjusted'
+
+#def manipulate_consolidate_timeseries(directory):
+dlist = os.listdir(directory)
+l =[]
+errorlist =[]
+
+for i in range(len(dlist)):
+    try:
+        tempfile = dlist[i:i+1][0]
+        #print(tempfile)
+        #TODO make sep | not ,
+        df = pd.read_csv(f'{directory}/{tempfile}',sep=',')
+        df = df[df['date'].isin(dates)]
+        df['sequence']=df['date'].map(sequence)
+        df['quarter'] = pd.PeriodIndex(df.date, freq='Q')
+        df['next_rolling62_adjustedclose'] = df['rolling62_adjustedclose'].shift(-1)
+        l.append(df)
+    except Exception as e:
+        print('exception of ',e)
+        errorlist.append(tempfile)
+df_out = pd.concat(l)
+dfcore = df_out[['ticker','rolling62_adjustedclose','next_rolling62_adjustedclose','sequence']]    
+#dfcore['return']= (dfcore['next_rolling90_adjustedclose']/dfcore['rolling90_adjustedclose'])-1
+dfcore.loc[:, 'return'] =  (dfcore.loc[:,'next_rolling62_adjustedclose']/dfcore.loc[:,'rolling62_adjustedclose'])-1
+
+spy = dfcore[dfcore['ticker']=='SPY']
+spy = spy.rename(columns={'return':'SPYreturn'})
+spy = spy[['sequence','SPYreturn']]
+dfcore = dfcore.merge(spy,on='sequence',how='inner')
+dfcore['better_than_spy']=np.where(dfcore['return']>dfcore['SPYreturn'],1,0)
+
+if len(errorlist)==0:
+    print('time series data consolidated')
+else:
+    print('the following files had issues:',errorlist)
+    
+ #   return dfcore,spy          
+
+# consolidated_time_series,spy = manipulate_consolidate_timeseries('data/TimeSeriesAdjusted')
+# #TODO fix this later... need to work on the whole process first... 
+# #why did I exclude GEHC? 
+# consolidated_time_series=consolidated_time_series[consolidated_time_series['ticker']!='GEHC']
+# consolidated_time_series.to_excel('wrangling/Consolidated_TimeSeries_Data.xlsx',index=False)
+# spy.to_excel('spy.xlsx',index=False)
+
+
+
+#ts = pd.read_excel('wrangling/Consolidated_TimeSeries_Data.xlsx')
+#print(ts.head())
+#tscore = ts[['ticker','rolling62_adjustedclose','next_rolling62_adjustedclose','sequence']]
+#print(spy.head())
+
