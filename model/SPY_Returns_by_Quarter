@@ -1,3 +1,4 @@
+#sketch script. NOT USED IN FINAL VERSION 
 
 import pandas as pd 
 
@@ -11,7 +12,7 @@ def spy_returns_by_quarter():
     startingmoney = 10000.00
     value = startingmoney
     l = []
-    for i in range(5):
+    for i in range(0,5):
         
         temp = pd.DataFrame({'quarter':[i],
                             'Spy Return':[spy['return'].iloc[i]]

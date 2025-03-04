@@ -14,8 +14,6 @@ from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
-
 #from sklearn.ensemble import GradientBoostingClassifier
 #from sklearn.ensemble import RandomForestRegressor
 #from sklearn.linear_model import LinearRegression
@@ -40,13 +38,13 @@ import sys
 feature_number =90
 regression_output_count = 300
 starting_money = 10000
-number_of_tickers_to_invest_in =20
+number_of_tickers_to_invest_in =5
 classification_probability = 0.55
 
 #not a sys argument
 
 weight_threshold = 0.005
-sequences = [0,1,2,3,4,5]
+sequences = [0,1,2,3,4]
 
 
 df = pd.read_excel('ml_data.xlsx')
@@ -61,8 +59,7 @@ def spy_returns_by_quarter():
     startingmoney = starting_money
     value = startingmoney
     l = []
-    #skip first and last quarter. 
-    #first set of data used as input data for first model. Last is used to test the preceding quarter 
+    #skip first quarter. only used as data for first model. 
     for i in range(1,5):
         
         temp = pd.DataFrame({'quarter':[i],
@@ -71,13 +68,12 @@ def spy_returns_by_quarter():
                             )
         value = value + value * spy['return'].iloc[i]
         l.append(temp)
-    SPY= pd.concat(l)
+    dfout = pd.concat(l)
 
     #print('SPY by quarter:',dfout)
     #print('SPY overall return:', value/startingmoney-1 )
-    return SPY
-#SPY = spy_returns_by_quarter()
-#SPY.to_excel('SPY_def_out.xlsx')
+    return dfout
+SPY = spy_returns_by_quarter()
 
 def get_top_n_important_features(df_train,model,n,weight):
     feature_importances = list(zip(df_train.columns.tolist(), model.feature_importances_))
@@ -89,7 +85,7 @@ def get_top_n_important_features(df_train,model,n,weight):
 
     top_n = top_n.reset_index()
     top_n = top_n.drop('index',axis=1)
-    top_n.index += 1 #make the first number 1 since we're looking at a top n. 
+    top_n.index += 1 #make the first number 1 since we're looking at a top 10.
     top_n[['Feature','Model Weight']]
     
     return top_n
@@ -487,7 +483,7 @@ def create_ticker_subset_from_ML(sequence,num_tickers_invest=number_of_tickers_t
 
 #TODO refactor this. the start monies diverge after the first month. 
 #TODO make a cumulative to account for multiple quarters as the 2 paths could diverge 
-def compare_Spy_vs_Spy(StockFilter,sequence,Spystart=starting_money,StockStart=starting_money,SPY=spy_returns_by_quarter()):
+def compare_Spy_vs_Spy(StockFilter,sequence,Spystart=starting_money,StockStart=starting_money,SPY=SPY):
     #SPY_= SPY[SPY['return']==sequence]
     #SPYstart = starting_money
     SPYend = SPY['Spy Return'].iloc[sequence]* Spystart +Spystart
@@ -508,15 +504,13 @@ def compare_Spy_vs_Spy(StockFilter,sequence,Spystart=starting_money,StockStart=s
     
 Spystart = starting_money
 StockStart = starting_money
-i = 3
-for i in range(i,i+1):
+for i in range(0,2):
     print('\n\n\nstarting sequence ',i,' to ',i+1)
     #TODO add beginning and ending avg 62 adjusted close, plus end return 
     StockFilter = create_ticker_subset_from_ML(sequence=i)    
     SPYend, Stockend, SPYreturn, Stockreturn = compare_Spy_vs_Spy(StockFilter=StockFilter,sequence=i+1,Spystart=Spystart,StockStart=StockStart)
     Spystart = SPYend
     StockStart = Stockend
-
 
 
 

@@ -5,7 +5,7 @@ sources to get the SPY list and changes
 Current SPY list from Wiki
 'https://en.m.wikipedia.org/wiki/List_of_S%26P_500_companies'
 
-source of the code snippet I used to get the current list via python
+source of the code snippet I used to get the current list of tickers in the SPY via python
 https://stackoverflow.com/a/75845569/
 
 SPY list (as of JAN 25)
@@ -14,11 +14,16 @@ https://stockanalysis.com/list/sp-500-stocks/
 History of changes to the SPY
 https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
 
+#to look at ticker charts, individual company stats, etc 
+https://finance.yahoo.com/
+
+
 alpha vantage
 https://www.alphavantage.co/documentation/
 
 alpha vantage financial statement definitions 
 https://documentation.alphavantage.co/FundamentalDataDocs/gaap_documentation.html#IncomeStatement
+
 
 snippet to convert a date to quarters
 https://stackoverflow.com/questions/50459301/how-to-convert-dates-to-quarters-in-python
@@ -29,8 +34,45 @@ https://corporatefinanceinstitute.com/resources/accounting/financial-ratios/
 article on ratio analysis 
 https://www.investopedia.com/terms/r/ratioanalysis.asp
 
+
+get the actual name of the model
+https://stackoverflow.com/questions/52763325/how-to-obtain-only-the-name-of-a-models-object-in-scikitlearn
+
+
 article on evaluating regression models
 https://medium.com/towards-data-science/ways-to-evaluate-regression-models-77a3ff45ba70
+
+#article discussing whether a time series is linear or not  
+https://medium.com/thedeephub/is-your-data-linear-4-simple-tests-to-find-out-c2a12852470d
+
+#regression metrics article 
+https://vitalflux.com/mse-vs-rmse-vs-mae-vs-mape-vs-r-squared-when-to-use/
+
+#possible parameters for gradient boosting classifier
+https://stackoverflow.com/questions/58781601/parameter-tuning-using-gridsearchcv-for-gradientboosting-classifier-in-python
+
+article on ensemble voting
+https://www.geeksforgeeks.org/ensemble-methods-in-python/
+
+
+my own github repositories (borrowing or referencing snippets of code from past udacity projects). 
+project1
+https://github.com/rolly9992/myDS_course
+
+project2
+https://github.com/rolly9992/Project2_AllFiles
+
+project3 
+https://github.com/rolly9992/Project3
+
+
+
+#xgboost considered this route. 
+https://xgboost.readthedocs.io/en/stable/get_started.html
+
+
+#getting ideas for how to optimize a classifier as there are so many combinations. And retraining takes time... 
+https://dnmtechs.com/optimizing-random-forest-classifier-with-gridsearchcv-in-python-3/
 
 
 python module references
@@ -44,29 +86,7 @@ https://pandas.pydata.org/
 #sklearn 
 https://scikit-learn.org/stable/index.html
 
-#regression metrics article 
-https://vitalflux.com/mse-vs-rmse-vs-mae-vs-mape-vs-r-squared-when-to-use/
 
-#possible parameters for gradient boosting classifier
-https://stackoverflow.com/questions/58781601/parameter-tuning-using-gridsearchcv-for-gradientboosting-classifier-in-python
-
-#to look at ticker charts, stats, etc 
-https://finance.yahoo.com/
-
-my own github repo2 (borrowing snippets of code from past udacity projects)
-project1
-https://github.com/rolly9992/myDS_course
-
-project2
-https://github.com/rolly9992/Project2_AllFiles
-
-
-#xgboost considered this route. 
-https://xgboost.readthedocs.io/en/stable/get_started.html
-
-
-#getting ideas for how to optimize the classifier - so many combinations. And retraining takes time... 
-https://dnmtechs.com/optimizing-random-forest-classifier-with-gridsearchcv-in-python-3/
 
 
 
