@@ -66,6 +66,30 @@ bools = ['gics_sector_Consumer Discretionary', 'gics_sector_Consumer Staples',
  'gics_sector_Materials', 'gics_sector_Real Estate', 'gics_sector_Utilities']
 
 
+def spy_returns_by_quarter():
+    #TODO refactor location when running from terminal
+    df = pd.read_excel('../wrangling/Consolidated_TimeSeries_Data.xlsx')
+    spy = df[df['ticker']=='SPY']
+    startingmoney = starting_money
+    value = startingmoney
+    l = []
+    #skip first and last quarter. 
+    #first set of data used as input data for first model. Last is used to test the preceding quarter 
+    for i in range(0,5):
+        
+        temp = pd.DataFrame({'sequence':[i],
+                            'Spy Return':[spy['return'].iloc[i]]
+                            ,'new value': [value + value * spy['return'].iloc[i]]}
+                            )
+        value = value + value * spy['return'].iloc[i]
+        l.append(temp)
+    SPY= pd.concat(l)
+
+    #print('SPY by quarter:',dfout)
+    #print('SPY overall return:', value/startingmoney-1 )
+    return SPY
+SPY = spy_returns_by_quarter()
+
 
 def get_top_n_important_features(df_train,model,n= feature_keep):
     #TODO verify this try except covers models that have feature importances and those that don't
@@ -94,29 +118,7 @@ def get_top_n_important_features(df_train,model,n= feature_keep):
 
 
 
-def spy_returns_by_quarter():
-    #TODO refactor location when running from terminal
-    df = pd.read_excel('../wrangling/Consolidated_TimeSeries_Data.xlsx')
-    spy = df[df['ticker']=='SPY']
-    startingmoney = starting_money
-    value = startingmoney
-    l = []
-    #skip first and last quarter. 
-    #first set of data used as input data for first model. Last is used to test the preceding quarter 
-    for i in range(0,5):
-        
-        temp = pd.DataFrame({'sequence':[i],
-                            'Spy Return':[spy['return'].iloc[i]]
-                            ,'new value': [value + value * spy['return'].iloc[i]]}
-                            )
-        value = value + value * spy['return'].iloc[i]
-        l.append(temp)
-    SPY= pd.concat(l)
 
-    #print('SPY by quarter:',dfout)
-    #print('SPY overall return:', value/startingmoney-1 )
-    return SPY
-SPY = spy_returns_by_quarter()
 
 
 
@@ -166,26 +168,22 @@ def prep_for_classifier(df):
         new_df = new_df.drop('gics_sector_nan',axis=1)
     except Exception:
         pass
-    
-    #new_df.to_excel('new_df.xlsx')
     return new_df
 
 def get_X_y_data_classifier(df,sequence):
-    #print(df.shape)
-    
+    '''INPUT 
+    dataframe, sequence (quarter) number
+    OUTPUT X and y for machine learning
+    '''    
     df = df[df['sequence']==sequence]
-    #print(df.shape)
     df = df.drop('sequence',axis=1)
     X = df.iloc[:,:-1]
-
-    #X.to_excel('X.xlsx')    
-    #print(X.columns.tolist())
     y = df.iloc[:,-1:]
     y=y['better_than_spy'].values
     return X,y
 
 
-
+#KEEP
 def evaluate_classifier_model(model, X_test, Y_test,sequence): #, category_names=None):
     '''INPUT
     the machine learning model we built earlier
@@ -227,46 +225,46 @@ def evaluate_classifier_model(model, X_test, Y_test,sequence): #, category_names
     return y_probs,y_pred ,metricsout
 
 
-
-def get_classifier_metrics(model, X_test, Y_test,sequence): #, category_names=None):
-    '''INPUT
-    the machine learning model we built earlier
-    X_test data
-    Y_test data
-    sequence number - for reference in metric output
-    the category names (pulled from the Y_test dataframe)
+#DROP
+# def get_classifier_metrics(model, X_test, Y_test,sequence): #, category_names=None):
+#     '''INPUT
+#     the machine learning model we built earlier
+#     X_test data
+#     Y_test data
+#     sequence number - for reference in metric output
+#     the category names (pulled from the Y_test dataframe)
     
-    OUTPUT 
-    dataframe metrics on how well each category performed, including 
-    -model name
-    -accuracy
-    -precision
-    -recall
-    -the F1 score
+#     OUTPUT 
+#     dataframe metrics on how well each category performed, including 
+#     -model name
+#     -accuracy
+#     -precision
+#     -recall
+#     -the F1 score
     
-    the output files are later used in some visuals in the Flask app
+#     the output files are later used in some visuals in the Flask app
        
-    '''
+#     '''
 
-    y_pred = model.predict(X_test)
-    #y_probs = model.predict_proba(X_test)[:,1] #only get if yes since we can derive no
+#     y_pred = model.predict(X_test)
+#     #y_probs = model.predict_proba(X_test)[:,1] #only get if yes since we can derive no
        
-    accuracy=accuracy_score(Y_test,y_pred)
-    precision=precision_score(Y_test,y_pred,average='weighted',zero_division=1)
-    recall=recall_score(Y_test,y_pred,average='weighted')
-    f1score = f1_score(Y_test,y_pred,average='weighted')    
-    print('\nscores:')
-    metricsout ={  'model':[model],
-           'sequence':[sequence], 
-           'Accurancy':[accuracy],
-                    'Precision':[precision],
-                    'Recall':[recall],
-                    'F1 Score':[f1score]}
-    #TODO remove print statement. curate into 1 larger df for easy comparison
-    #print(temp)
-    metricsout = pd.DataFrame(metricsout)
+#     accuracy=accuracy_score(Y_test,y_pred)
+#     precision=precision_score(Y_test,y_pred,average='weighted',zero_division=1)
+#     recall=recall_score(Y_test,y_pred,average='weighted')
+#     f1score = f1_score(Y_test,y_pred,average='weighted')    
+#     print('\nscores:')
+#     metricsout ={  'model':[model],
+#            'sequence':[sequence], 
+#            'Accurancy':[accuracy],
+#                     'Precision':[precision],
+#                     'Recall':[recall],
+#                     'F1 Score':[f1score]}
+#     #TODO remove print statement. curate into 1 larger df for easy comparison
+#     #print(temp)
+#     metricsout = pd.DataFrame(metricsout)
     
-    return metricsout
+#     return metricsout
 
 #TODO refactor this def. 
 # def train_classifier_feature_selection_run_on_next_sequence(df,model,sequence):
@@ -351,7 +349,77 @@ def train_classifier_feature_selection_run_on_next_sequence_v2(df,model,sequence
         y_probs,y_pred=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence) 
 
     
-    return y_probs,y_pred,metrics
+    return y_probs,y_pred
+
+
+
+
+###workout refactoring 
+
+
+#inside def 
+#def
+#inputs: model, sequence, df, try reduce features yes,no 
+#outputs ypred yprob, metrics (for 1 model, not multiple. too complex
+
+#make universal
+#keep the version with the higher precision
+def train_improve_model(model,sequence):
+    top_n=None
+    prec2=0
+    #split
+    X,y=get_X_y_data_classifier(dfin,sequence=s)
+    #train test
+    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
+    
+    # #train the generic model with all features to find more important ones
+    #modelclf1 =RandomForestClassifier(random_state=42)
+    model.fit(X_train,y_train)
+    y_probs,y_pred,metricsout1=evaluate_classifier_model(model, X_test=X_test, Y_test=y_test,sequence=sequence)
+    crossval = (cross_val_score(model, X_train, y_train, cv=5))
+    print('average cross val:',crossval.mean())
+    prec1 = metricsout1['Precision'].iloc[0]
+    print('prec1:',prec1)
+    #CONDITIONAL BASED ON MODEL TYPE
+    try:
+        model2 = model
+        #attempt to refit model with reduced number of features
+        top_n = get_top_n_important_features(X_train,model,n= feature_keep)
+        X_train =X_train[top_n]
+        X_test = X_test[top_n]
+        model2.fit(X_train,y_train)
+        y_probs,y_pred,metricsout2=evaluate_classifier_model(model2, X_test=X_test, Y_test=y_test,sequence=sequence)
+        crossval2 = (cross_val_score(model2, X_train, y_train, cv=5))
+        #print(cross_val_score(model, X_train, y_train, cv=5))
+        print('average cross val:',crossval2.mean())
+        prec2 = metricsout2['Precision'].iloc[0]
+        print('prec2:',prec2)
+    except Exception:
+        pass #keeps initial training 
+    if prec1>prec2:
+        modelchoice = model
+        finalmetrics =metricsout1
+        finalcrossval = crossval
+    else:
+        modelchoice = model2
+        finalmetrics = metricsout2
+        finalcrossval = crossval2
+    print('final:',modelchoice,finalmetrics['Precision'].iloc[0],finalcrossval.mean() )        
+    return modelchoice,finalmetrics,finalcrossval ,top_n
+
+
+#if top_n exists, need to include that 
+def predict_future_data(model,sequence,top_n):
+    
+    X,y=get_X_y_data_classifier(dfin,sequence=sequence)
+    if top_n==None:
+        pass
+    else:
+        X=X[top_n]
+    #model.predict(X)
+    y_probs,y_pred,metricsout=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence)
+    return y_probs,y_pred,metricsout 
+
 
 #TODO
 '''run  the 5 models through sequence i, get metrics and cv
@@ -363,59 +431,100 @@ do the same thing on the ensemble model, running on sequence i, get metrics and 
 
 '''
 
-s = 0
+
+
+
+######################################################################
+#trying to use reduced features as an option 
+###########################################################################
+#preps data for classifier --only need to do once. 
+dfin = prep_for_classifier(df)
+
+
+s = 3
 sequence = s
 
 # #split specific sequence into X, y components (all features)
 
-models = [RandomForestClassifier(random_state=42),
+generic_models = [RandomForestClassifier(random_state=42),
        GradientBoostingClassifier(),
       LogisticRegression(random_state=42),
       SVC(probability=True),
       KNeighborsClassifier()     ]
-model = models[0]
 
-###workout refactoring 
+#run models thru a loop to evaluate individually 
+# then run thru ensemble 
 
-#preps data for classifier
-dfin = prep_for_classifier(df)
-#split
-X,y=get_X_y_data_classifier(dfin,sequence=s)
-#train test
-X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
-
-# #train the generic model with all features to find more important ones
-#modelclf1 =RandomForestClassifier(random_state=42)
-model.fit(X_train,y_train)
-evaluate_classifier_model(model, X_test=X_test, Y_test=y_test,sequence=sequence)
-crossval = (cross_val_score(model, X_train, y_train, cv=5))
-print('average cross val:',crossval.mean())
-
-#CONDITIONAL BASED ON MODEL TYPE
-try:
-    #attempt to refit model with reduced number of features
-    top_n = get_top_n_important_features(X_train,model,n= feature_keep)
-    X_train =X_train[top_n]
-    X_test = X_test[top_n]
-    model.fit(X_train,y_train)
-    #evaluate_classifier_model(model, X_test=X_test, Y_test=y_test,sequence=sequence)
-    print(cross_val_score(model, X_train, y_train, cv=5))
+#model = models[0]  
+mnames =[]
+voters =[]  
+lf =[]
+for i in range(5):
+    model = generic_models[i]   
     
-    #use model on NEXT sequence
-    X,y=get_X_y_data_classifier(dfin,sequence=s+1)
-    X =X[top_n]
-    y_probs,y_pred,metricsout=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence)
+    model,metricsouttest,crossval,top_n =train_improve_model(model,sequence)
+    model_name = type(model).__name__
+    mnames.append(model_name)
+    voters.append((model_name,model))    
+    #voters.append(model)
+    #sys.exit()
+    #for DEV using on next sequence to predict stock picks and test at the end 
+    y_probs,y_pred,metricsoutfuture =predict_future_data(model,sequence=s+1,top_n=top_n)
+    lf.append(metricsoutfuture)
+    
+predictedmetricsoutfuture = pd.concat(lf,axis=0)
+    
+    
 
-except Exception as e:
-    print('exception of',e)
-    #pass
-    #SVC and KNN can't use the above route.         
-    #X,y=get_X_y_data_classifier(dfin,sequence=s+1)
-    #y_probs,y_pred=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence) 
+combined_model = VotingClassifier(estimators=voters)
+#model,metricsouttest,crossval,top_n =train_improve_model(combined_model,sequence)
+X,y=get_X_y_data_classifier(dfin,sequence=s)
+# train test
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
+ 
+combined_model.fit(X_train,y_train)    
+# predicting the output on the test dataset
+pred_final = combined_model.predict(X_test)
+print('evaluate combined model')
+accuracy=accuracy_score(y_test,pred_final)
+precision=precision_score(y_test,pred_final,average='weighted',zero_division=1)
+recall=recall_score(y_test,pred_final,average='weighted')
+f1score = f1_score(y_test,pred_final,average='weighted')    
+print('\nscores:')
+temp ={  'model':'ensemble_model',
+       #'sequence':sequence, 
+       'Accurancy':accuracy,
+                'Precision':precision,
+                'Recall':recall,
+                'F1 Score':f1score}
+print(temp)
 
+#trying on next sequence 
+print('\n\n combined on next sequence')
+X,y=get_X_y_data_classifier(dfin,sequence=s+1)
+# train test
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
+ 
+#combined_model.fit(X_train,y_train)    
+# predicting the output on the test dataset
+pred_final = combined_model.predict(X_test)
+print('evaluate combined model')
+accuracy=accuracy_score(y_test,pred_final)
+precision=precision_score(y_test,pred_final,average='weighted',zero_division=1)
+recall=recall_score(y_test,pred_final,average='weighted')
+f1score = f1_score(y_test,pred_final,average='weighted')    
+print('\nscores:')
+temp ={  'model':'ensemble_model',
+       #'sequence':sequence, 
+       'Accurancy':accuracy,
+                'Precision':precision,
+                'Recall':recall,
+                'F1 Score':f1score}
+print(temp)
 
-#return y_probs,y_pred,metrics
-
+######################################################################
+#end using reduced features as an option 
+###########################################################################
 
 
 sys.exit()
