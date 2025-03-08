@@ -42,8 +42,8 @@ import sys
 #NOTE grid search seems to overfit due to smaller row size. 
 
 #NOTE added to a def parameter for more flexibility
-#feature_keep =90
-regression_output_count = 300
+
+
 starting_money = 10000
 number_of_tickers_to_invest_in =5
 
@@ -86,7 +86,7 @@ def spy_returns_by_quarter():
                             )
         value = value + value * spy['return'].iloc[i]
         l.append(temp)
-    SPY= pd.concat(l,axis=0)
+    SPY= pd.concat(l,axis=1)
 
     #print('SPY by quarter:',dfout)
     #print('SPY overall return:', value/startingmoney-1 )
@@ -153,8 +153,8 @@ def prep_for_classifier(df):
         temp = cat_vars[i]
         catout = pd.get_dummies(df[temp],prefix=temp,prefix_sep='_',dummy_na=True,drop_first=True)
         l.append(catout)
-    dfcat=pd.concat(l,axis=0)
-    dfcat=dfcat.drop(columns=cat_vars,axis=0)
+    dfcat=pd.concat(l,axis=1)
+    dfcat=dfcat.drop(columns=cat_vars,axis=1)
     #print(df.shape)
     #print(dfcat.shape) #expecting an increase due to adding dummies. 
     cat_cols = dfcat.columns.tolist()
@@ -164,7 +164,7 @@ def prep_for_classifier(df):
     df_bool = df[booleanvars]
     df_nonbool = df[nonbooleanvars]
     df_nonbool = (df_nonbool-df_nonbool.mean())/df_nonbool.std()
-    new_df = pd.concat([dfcat,seqvar,df_nonbool,df_bool],axis=0)
+    new_df = pd.concat([dfcat,seqvar,df_nonbool,df_bool],axis=1)
     #in case the nan sector field does not exist in each sequence or all blanks. 
     #we need to remove 1 of the sector dummy cols anyway. This is the best one. 
     try:
@@ -290,185 +290,96 @@ def train_model_reduced_features(model,X_train_y_train,feature_keep):
           
     return model, top_n
 
-#TODO refactor this def. 
-# def train_classifier_feature_selection_run_on_next_sequence_v2(df,model,sequence):
-#     '''
-#     get inputs 
-#     train model
-#     test model 
-#     save metrics
-#     run prediction on next sequence get those pics 
-#     also save metrics from that for the very end. 
-
-#     '''
-
-#     X,y=get_X_y_data_classifier(df,sequence=s)
-#     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
-#     # #train the generic model with all features to find more important ones
-#     #modelclf1 =RandomForestClassifier(random_state=42)
-#     model.fit(X_train,y_train)
-#     evaluate_classifier_model(model, X_test=X_test, Y_test=y_test,sequence=sequence)
-#     crossval = (cross_val_score(model, X_train, y_train, cv=5))
-#     print('average cross val:',crossval.mean())
-    
-#     #CONDITIONAL BASED ON MODEL TYPE
-#     try:
-#         #attempt to refit model with reduced number of features
-#         top_n = get_top_n_important_features(X_train,model,n= feature_keep)
-#         X_train =X_train[top_n]
-#         X_test = X_test[top_n]
-#         model.fit(X_train,y_train)
-#         #evaluate_classifier_model(model, X_test=X_test, Y_test=y_test,sequence=sequence)
-#         print(cross_val_score(model, X_train, y_train, cv=5))
-        
-#         #use model on NEXT sequence
-#         X,y=get_X_y_data_classifier(dfin,sequence=s+1)
-#         X =X[top_n]
-#         y_probs,y_pred=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence)
-    
-#     except Exception:
-#         #SVC and KNN can't use the above route.         
-#         X,y=get_X_y_data_classifier(dfin,sequence=s+1)
-#         y_probs,y_pred=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence) 
-
-    
-#     return y_probs,y_pred
 
 
-###workout refactoring 
 
+#######################################################################################
+#NEW Spartan DEFS that each only do 1 thing to make cleaner code 
+#TODO add input output statements 
+#######################################################################################
+#preps data for classifier --only need to do once. 
+s = 3 #consolidate s into sequence for clarity 
 
-#make universal
-#keep the version with the higher precision
-#TODO refactor this 
-# def train_improve_model(model,sequence):
-#     top_n=None
-#     prec2=0
-#     #split
-#     X,y=get_X_y_data_classifier(dfin,sequence=s)
-#     #train test
-#     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
-    
-#     # #train the generic model with all features to find more important ones
-#     #modelclf1 =RandomForestClassifier(random_state=42)
-#     model.fit(X_train,y_train)
-#     y_probs,y_pred,metricsout1=evaluate_classifier_model(model, X_test=X_test, Y_test=y_test,sequence=sequence)
-#     crossval = (cross_val_score(model, X_train, y_train, cv=5))
-#     print('average cross val:',crossval.mean())
-#     prec1 = metricsout1['Precision'].iloc[0]
-#     print('prec1:',prec1)
-#     #CONDITIONAL BASED ON MODEL TYPE
-#     try:
-#         model2 = model
-#         #attempt to refit model with reduced number of features
-#         top_n = get_top_n_important_features(X_train,model,n= feature_keep)
-#         X_train =X_train[top_n]
-#         X_test = X_test[top_n]
-#         model2.fit(X_train,y_train)
-#         y_probs,y_pred,metricsout2=evaluate_classifier_model(model2, X_test=X_test, Y_test=y_test,sequence=sequence)
-#         crossval2 = (cross_val_score(model2, X_train, y_train, cv=5))
-#         #print(cross_val_score(model, X_train, y_train, cv=5))
-#         print('average cross val:',crossval2.mean())
-#         prec2 = metricsout2['Precision'].iloc[0]
-#         print('prec2:',prec2)
-#     except Exception:
-#         pass #keeps initial training 
-#     if prec1>prec2:
-#         modelchoice = model
-#         finalmetrics =metricsout1
-#         finalcrossval = crossval
-#     else:
-#         modelchoice = model2
-#         finalmetrics = metricsout2
-#         finalcrossval = crossval2
-#     print('final:',modelchoice,finalmetrics['Precision'].iloc[0],finalcrossval.mean() )        
-#     return modelchoice,finalmetrics,finalcrossval ,top_n
+#only need to do this once. 
+dfin = prep_for_classifier(df)
 
 
 
 
-# #######################################################################################
-# #NEW Spartan DEFS that each only do 1 thing to make cleaner code 
-# #TODO add input output statements 
-# #######################################################################################
-# #preps data for classifier --only need to do once. 
-# #s = 3 #consolidate s into sequence for clarity 
 
-# #only need to do this once. 
-# dfin = prep_for_classifier(df)
 
-# sequence = 0
-# X,y=get_X_y_data_classifier(dfin,sequence=sequence)
-# #train test
-# X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
+sequence = 0
+X,y=get_X_y_data_classifier(dfin,sequence=sequence)
+#train test
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
  
 
-# def train_generic_model(model,X_train,y_train):
-#     model.fit(X_train,y_train)
-#     return model
+def train_generic_model(model,X_train,y_train):
+    model.fit(X_train,y_train)
+    return model
 
-# def train_feature_reduction_model(model,X_train,y_train,features_keep):
-#     pass
+def train_feature_reduction_model(model,X_train,y_train,features_keep):
+    pass
 
-# def train_grid_search_model(model,X_train,y_train):
-#     pass
+def train_grid_search_model(model,X_train,y_train):
+    pass
 
-# def train_voter_model(voters,X_train,y_train):
-#     combined_model = VotingClassifier(estimators=voters)
-#     combined_model.fit(X_train,y_train)  
-#     return combined_model
+def train_voter_model(voters,X_train,y_train):
+    combined_model = VotingClassifier(estimators=voters)
+    combined_model.fit(X_train,y_train)  
+    return combined_model
 
 
-# def cross_validate_model_mean(model,X_train,y_train):
-#     crossval = (cross_val_score(model, X_train, y_train, cv=5))
-#     return crossval.mean()
+def cross_validate_model_mean(model,X_train,y_train):
+    crossval = (cross_val_score(model, X_train, y_train, cv=5))
+    return crossval.mean()
 
-# def evaluate_model(model, X_test, Y_test,sequence): #, category_names=None):
-#     '''INPUT
-#     the machine learning model we built earlier
-#     X_test data
-#     Y_test data
-#     sequence number - for reference in metric output
-#     the category names (pulled from the Y_test dataframe)
+def evaluate_model(model, X_test, Y_test,sequence): #, category_names=None):
+    '''INPUT
+    the machine learning model we built earlier
+    X_test data
+    Y_test data
+    sequence number - for reference in metric output
+    the category names (pulled from the Y_test dataframe)
     
-#     OUTPUT 
-#     dataframe metrics on how well each category performed, including 
-#     -model name
-#     -accuracy
-#     -precision
-#     -recall
-#     -the F1 score
+    OUTPUT 
+    dataframe metrics on how well each category performed, including 
+    -model name
+    -accuracy
+    -precision
+    -recall
+    -the F1 score
         
-#     '''
+    '''
 
-#     y_pred = model.predict(X_test)
-#     accuracy=accuracy_score(Y_test,y_pred)
-#     precision=precision_score(Y_test,y_pred,average='weighted',zero_division=1)
-#     recall=recall_score(Y_test,y_pred,average='weighted')
-#     f1score = f1_score(Y_test,y_pred,average='weighted')    
-#     metricsout ={ 'test for': ['test'] ,
-#         'model':[model],
-#            'sequence':[sequence], 
-#            'Accurancy':[accuracy],
-#                     'Precision':[precision],
-#                     'Recall':[recall],
-#                     'F1 Score':[f1score]}
-#     metricsout = pd.DataFrame(metricsout)
-#     return metricsout
+    y_pred = model.predict(X_test)
+    accuracy=accuracy_score(Y_test,y_pred)
+    precision=precision_score(Y_test,y_pred,average='weighted',zero_division=1)
+    recall=recall_score(Y_test,y_pred,average='weighted')
+    f1score = f1_score(Y_test,y_pred,average='weighted')    
+    metricsout ={ 'test for': ['test'] ,
+        'model':[model],
+           'sequence':[sequence], 
+           'Accurancy':[accuracy],
+                    'Precision':[precision],
+                    'Recall':[recall],
+                    'F1 Score':[f1score]}
+    metricsout = pd.DataFrame(metricsout)
+    return metricsout
 
 
-# #if top_n exists, need to include that 
-# def predict_data(model,sequence,top_n):
-#     pass
-#     #CLEAN THIS UP 
-#     X,y=get_X_y_data_classifier(dfin,sequence=sequence)
-#     if top_n==None:
-#         pass
-#     else:
-#         X=X[top_n]
-#     #model.predict(X)
-#     y_probs,y_pred,metricsout=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence)
-#     return y_probs,y_pred
+#if top_n exists, need to include that 
+def predict_data(model,sequence,top_n):
+    pass
+    #CLEAN THIS UP 
+    X,y=get_X_y_data_classifier(dfin,sequence=sequence)
+    if top_n==None:
+        pass
+    else:
+        X=X[top_n]
+    #model.predict(X)
+    y_probs,y_pred,metricsout=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence)
+    return y_probs,y_pred
 
 
 
@@ -492,114 +403,134 @@ do the same thing on the ensemble model, running on sequence i, get metrics and 
 
 '''
 
-# generic_models = [RandomForestClassifier(random_state=42),
-#        GradientBoostingClassifier(),
-#       LogisticRegression(random_state=42),
-#       SVC(probability=True),
-#       KNeighborsClassifier()     ]
-
-# ###########################################################
-# ## STEP 1 use the 5 generic models and a voter
-# ###########################################################
-# # #split specific sequence into X, y components (all features)
+generic_models = [RandomForestClassifier(random_state=42),
+       GradientBoostingClassifier(),
+      LogisticRegression(random_state=42),
+      SVC(probability=True),
+      KNeighborsClassifier()     ]
 
 
-# #sequence = 0
-# X,y=get_X_y_data_classifier(dfin,sequence=sequence)
-# #train test
-# X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
- 
+###########################################################
+## STEP 1 use the 5 generic models and a voter
+###########################################################
+# #split specific sequence into X, y components (all features)
 
-#train 5 generic models plus voter 
-  
-# mnames =[]
-# voters =[]  
-# #list of future prediction metrics 
-# collectmetrics =[]
-# for i in range(5):
-#     model = generic_models[i]   
-#     model = train_generic_model(model,X_train,y_train)
-#     metricsout = evaluate_model(model=model, X_test=X_test, Y_test=y_test,sequence=sequence)
-#     #model,metricsouttest,crossval,top_n =train_improve_model(model,sequence)
-#     model_name = type(model).__name__
-#     mnames.append(model_name)
-#     voters.append((model_name,model))    
-#     collectmetrics.append(metricsout)
-# metricstest_generic = pd.concat(collectmetrics,axis=0)
+def train_evaluate_generic_models(dfin,sequence):
+    
+    X,y=get_X_y_data_classifier(dfin,sequence=sequence)
+    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
+    #train 5 generic models plus voter 
+    mnames =[]
+    voters =[]  
+    #list of future prediction metrics 
+    collectmetrics =[]
+    for i in range(5):
+        model = generic_models[i]   
+        model = train_generic_model(model,X_train,y_train)
+        metricsout = evaluate_model(model=model, X_test=X_test, Y_test=y_test,sequence=sequence)
+        #model,metricsouttest,crossval,top_n =train_improve_model(model,sequence)
+        model_name = type(model).__name__
+        mnames.append(model_name)
+        voters.append((model_name,model))    
+        collectmetrics.append(metricsout)
+    metricstest_generic = pd.concat(collectmetrics,axis=0)
+    
+    voter_model = VotingClassifier(estimators=voters)
+    voter_model.fit(X_train,y_train)    
+    # # predicting the voter model
+    #pred_generic = voter_model.predict(X_test)
+    
+    #print('evaluate combined generic model')
+    metricstest_genericCombined = evaluate_model(model=voter_model, X_test=X_test, Y_test=y_test,sequence=sequence)
+    metricstest_genericCombined['model']='generic_voter_model' 
+    allmodelmetrics = pd.concat([metricstest_generic,metricstest_genericCombined],axis=0)
+    return allmodelmetrics
 
-# voter_model = VotingClassifier(estimators=voters)
-# voter_model.fit(X_train,y_train)    
-# # # predicting the voter model
-# pred_generic = voter_model.predict(X_test)
+#THIS WORKS TO GET GENERIC METRICS OUT 
+l = []
+for i in range(5):
+    genericout = train_evaluate_generic_models(dfin,sequence=i)
+    l.append(genericout)
+genericmetricsdf = pd.concat(l,axis=0)
+genericmetricsdf.to_excel('generic_metrics.xlsx')
 
-# print('evaluate combined generic model')
-# metricstest_genericCombined = evaluate_model(model=voter_model, X_test=X_test, Y_test=y_test,sequence=0)
+#TODO use Jupyter notebooks to investigate combos 
 
-#sys.exit()
 
-# ###########################################################
-# ## STEP 2 explore what the best number of features might be
-# ###########################################################
+# ############################################################################################
+# ## STEP 2 explore what the best number of features might be and test on each of the 5 models
+# ############################################################################################
 
 # #run models thru a loop to evaluate individually with feature reduction
 # # then run thru ensemble 
 
 
-# sequence = 0
-# X,y=get_X_y_data_classifier(dfin,sequence=sequence)
-# #train test
-# X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
- 
+#sequence = 0
 
-# featurenumbers =[100,90,80,70,60,50]
-# #features_keep = get_top_n_important_features(X_train,model,n= 100)
-
-# featurelist = []
-# for i in range(len(featurenumbers)):
-#     model = generic_models[0] #using RandomForestClassifier for feature reduction
-#     model = train_generic_model(model,X_train,y_train)
-#     features_keep = get_top_n_important_features(X_train,model,n= featurenumbers[i])
-#     featurelist.append(features_keep)    
+def explore_different_number_of_features_used(dfin,sequence):
+    X,y=get_X_y_data_classifier(dfin,sequence=sequence)
+    #train test
+    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
+    featurenumbers =[100,90,80,70,60,50]
+    #features_keep = get_top_n_important_features(X_train,model,n= 100)
     
-
-# #step 1 train 5 generic models plus voter 
-# #model = models[0]  
-# mnames =[]
-# voters =[]  
-# #list of future prediction metrics 
-# lf =[]
-# #using random forest classifier to get feature reduction
-# collectmetrics =[]
-
-
-# X,y=get_X_y_data_classifier(dfin,sequence=sequence)
-# #train test
-# broadermetrics =[]
-# for j in range(len(featurelist)):
-#     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
-#     X_train=X_train[featurelist[j]]
-#     X_test=X_test[featurelist[j]] 
+    featurelist = []
+    for i in range(len(featurenumbers)):
+        model = generic_models[0] #using RandomForestClassifier for feature reduction
+        model = train_generic_model(model,X_train,y_train)
+        features_keep = get_top_n_important_features(X_train,model,n= featurenumbers[i])
+        featurelist.append(features_keep)    
+   
+    #step 1 train 5 generic models plus voter 
+    #model = models[0]  
+    mnames =[]
+    voters =[]  
+    #list of future prediction metrics 
+    
+    #using random forest classifier to get feature reduction
+    collectmetrics =[]
+    X,y=get_X_y_data_classifier(dfin,sequence=sequence)
     
     
-#     for i in range(5):
-#         model = generic_models[i]      
+    for j in range(len(featurelist)):
+        X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
+        X_train=X_train[featurelist[j]]
+        X_test=X_test[featurelist[j]] 
         
-#         model = train_generic_model(model,X_train,y_train)
-#         metricsout = evaluate_model(model=model, X_test=X_test, Y_test=y_test,sequence=sequence)
-#         metricsout['numberoffeatures']=len(featurelist[j])
-#         #model,metricsouttest,crossval,top_n =train_improve_model(model,sequence)
-#         model_name = type(model).__name__
-#         mnames.append(model_name)
-#         voters.append((model_name,model))    
-#         collectmetrics.append(metricsout)
-# metricstest_feature_reduction = pd.concat(collectmetrics,axis=0)
-# #metricstest_feature_reduction.to_excel('metricstest_feature_reduction.xlsx',index=None)
+        
+        for i in range(5):
+            model = generic_models[i]      
+            
+            model = train_generic_model(model,X_train,y_train)
+            metricsout = evaluate_model(model=model, X_test=X_test, Y_test=y_test,sequence=sequence)
+            metricsout['numberoffeatures']=len(featurelist[j])
+            #model,metricsouttest,crossval,top_n =train_improve_model(model,sequence)
+            model_name = type(model).__name__
+            mnames.append(model_name)
+            voters.append((model_name,model))    
+            collectmetrics.append(metricsout)
+    metricstest_feature_reduction = pd.concat(collectmetrics,axis=0)
+    return metricstest_feature_reduction
+
+#This works 
+# l = []
+# for i in range(5):
+#     featurestestingout = explore_different_number_of_features_used(dfin,sequence=i)
+    
+#     featurestestingout['sequence']= i
+#     l.append(featurestestingout)
+# featurestestingmetricsdf = pd.concat(l,axis=0)
+# featurestestingmetricsdf.to_excel('features_testing_metrics.xlsx')
+
+#TODO use jupyter notebooks to investigate combos. 
+
+
 
 
 # ####################################################################################
+### THIS STEP MAY NOT BE NECESSARY... or replace with using 5 simple models with voting 
 # ## ROUND 3 use models with 90 features, then a voter model with the same 90 features
 # ####################################################################################
-
 
 
 # sequence = 0
@@ -650,7 +581,7 @@ do the same thing on the ensemble model, running on sequence i, get metrics and 
 #         mnames.append(model_name)
 #         voters.append((model_name,model))    
 #         collectmetrics.append(metricsout)
-# metricstest_feature_reduction = pd.concat(collectmetrics,axis=0)
+# metricstest_feature_reduction = pd.concat(collectmetrics,axis=1)
 # #metricstest_feature_reduction.to_excel('metricstest_feature_reduction.xlsx',index=None)
  
 # #sys.exit()
