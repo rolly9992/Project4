@@ -42,28 +42,14 @@ df = pd.read_excel('model/ml_data.xlsx')
 df = df.set_index('ticker')
 df.shape
 
-
-
-
 #get the numerical variables
 num_vars = df.select_dtypes(include=['float','int']).columns
 dfnum=df[num_vars]
-#corr = dfnum.corr()
-#corr #we will need to consider correlated features 
-
-
-
-#df.describe()
-
-
 
 nulls = df.isna().sum()
 nulls.max() #no nulls after manipulation 
 
 
-
-#plot the non boolean numerical variables to look at distributions 
-#NOTE some distributions look squished due to the "cookie cutter" method to quickly look at all of them. 
 
 booleanvars = [col for col in dfnum.columns if set(dfnum[col].unique()).issubset({0,1})]
 #print(len(booleanvars))

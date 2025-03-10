@@ -19,7 +19,7 @@ import sys
 from datetime import date
 from datetime import datetime as dt
 from dateutil.relativedelta import relativedelta, FR
-
+import os 
 
 
 
@@ -62,7 +62,9 @@ def get_SandP_List():
 
 
 def pull_adjusted_time_series(key,pull_type):
-      
+    dir_ts = "data/TimeSeriesAdjusted"
+    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
+    
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
     tl = df['ticker']
     tl = list(set(tl))
@@ -81,7 +83,7 @@ def pull_adjusted_time_series(key,pull_type):
                 '8. split coefficient':'split coefficient'
                 }
 
-    df = pd.read_excel('data/sp500_tickerlist.xlsx')
+    #df = pd.read_excel('data/sp500_tickerlist.xlsx')
     tl = df['ticker']
 
     countcheck = len(tl)
@@ -94,7 +96,7 @@ def pull_adjusted_time_series(key,pull_type):
     #             ,'2023-06-30':4 }
 
     errorlist = []
-    errorfilesave = []
+    #errorfilesave = []
 
 
     l_meta=[]
@@ -104,7 +106,7 @@ def pull_adjusted_time_series(key,pull_type):
     
         try:
             
-            ticker =tl[i]  #the 9 ETF sector tickers 
+            ticker =tl[i]   
             ticker = ticker.replace(' ','')
             ticker = ticker.replace('.','-')
             
@@ -131,7 +133,7 @@ def pull_adjusted_time_series(key,pull_type):
             print(i,ticker)    
             print('this is the error: ',e)
             continue
-    print('adjusted time series finished')
+    print('adjusted time series data pulled')
     #print('errorlist:',errorlist)
     df_meta=pd.concat(l_meta)
     df_meta.to_excel('data/ts_meta_check.xlsx')
@@ -139,6 +141,8 @@ def pull_adjusted_time_series(key,pull_type):
 
 ##pulling BALANCE sheets
 def pull_Balance_Sheets(key,pull_type):
+    dir_ts = "data/BalanceSheets"
+    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
     #start = time.time()  
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
     tl = df['ticker']
@@ -186,7 +190,9 @@ def pull_Balance_Sheets(key,pull_type):
 
 ###CASHFLOW STATEMENTS
 def pull_Cashflow_Statements(key,pull_type):
-    #start = time.time()  
+    dir_ts = "data/CashFlowStatements"
+    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
+      
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
     tl = df['ticker']
 
@@ -194,7 +200,7 @@ def pull_Cashflow_Statements(key,pull_type):
         countpull = len(tl)
     else:
         countpull = 2    
-    countcheck = len(tl)
+
 
 
     errorlist = []
@@ -236,6 +242,8 @@ def pull_Cashflow_Statements(key,pull_type):
 
 ###INCOME STATEMENT
 def pull_Income_Statements(key,pull_type):
+    dir_ts = "data/IncomeStatements"
+    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
     #start = time.time()  
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
     tl = df['ticker']
@@ -276,8 +284,8 @@ def pull_Income_Statements(key,pull_type):
         print('the following tickers did not pull data')
         print(errorlist)
     else:
-        print('all income statements') 
-    #print(data)
+        print('all income statements pulled') 
+
 
 
 

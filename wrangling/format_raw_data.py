@@ -33,6 +33,11 @@ def calculate_non_blank_columns_in_row(row):
     return row.notna().sum() 
 
 def create_time_series_data():
+    '''INPUT
+    nothing 
+    OUTPUT
+    converts end of quarter dates to sequence numbers which are easier to both use and understand when coding.
+    '''
     dates = ['2022-06-30','2022-09-30','2022-12-30','2023-03-31' ,'2023-06-30','2023-09-29']
     sequence = {
                 '2022-06-30':0
@@ -45,6 +50,15 @@ def create_time_series_data():
 
 
     def manipulate_consolidate_timeseries(directory):
+        '''INPUT 
+        each of the 504 time series files (including the SPY itself) from the time series subdirectory
+        OUTPUT
+        a consolidated file for each of the tickers with 6 sequence numbers
+        also adds return per ticker per quarter/sequence along with our target variable better than SPY (yes/no)
+        a separate saved excel file with SPY data for later comparison. 
+        also created a separate excel file with start/end dates for each ticker for QC purposes. 
+        
+        '''
         dlist = os.listdir(directory)
         l =[]
         errorlist =[]
@@ -103,10 +117,16 @@ def create_time_series_data():
 
 
 
-
-
-
 def manipulate_consolidate_data(directory):
+    '''INPUT
+    directory
+    OUTPUT 
+    this definition can be used to consolidate each of the financial statement types
+    (balance sheets, income statements and cash flow statements)
+    It orders by quarter, fills in missing data dedupes if more than 1 statement per quarter. 
+    Then filters for only the 6 quarters we are looking at. 
+    Finally it combines all the ticker data for a particular financial data type into 1 dataframe 
+    '''
     dlist = os.listdir(directory)
     l =[]
     errorlist =[]
@@ -127,6 +147,7 @@ def manipulate_consolidate_data(directory):
             df = df.ffill()
             
             #fiscalDateEnding in all 3 financial pieces: Balance Sheets, Cash Flows and Income Statements. 
+            #note, I'm using a cutoff about 1 year before to give higher odds to be able to interpolate instead of front or back fill
             df = df[df['fiscalDateEnding']>'2021-06-30']
             #this is redundant 
             df.fillna(0,inplace=True)
@@ -135,8 +156,8 @@ def manipulate_consolidate_data(directory):
             # Sort the DataFrame by 'ID', 'Quarter', and 'Date' in descending order
             df = df.sort_values(by=['ticker', 'quarter', 'fiscalDateEnding'], ascending=[True, True, False])
 
-            # Drop duplicates, keeping the latest fiscalDateEnding 
-            df = df.drop_duplicates(subset=['ticker', 'quarter'], keep='first')
+            # Drop duplicates, keeping the latest fiscalDateEnding  
+            df = df.drop_duplicates(subset=['ticker', 'quarter'], keep='last')
 
             #in case the above doesn't take care of the same ticker in the same quarter (not seeing how it would fail, but... )
             #applying the function created above to look for 2 items from the same ticker in the same quarter and keep one with more data
@@ -155,6 +176,12 @@ def manipulate_consolidate_data(directory):
     return df_out          
     
 def wrap_up_consolidating_financials():
+    '''INPUT
+    nothing
+    OUTPUT 
+    cycles through the previous consolidation definition for each of the 3 types of financial data. 
+    Then saves each consolidated piece to an excel file. 
+    '''
     consolidated_balance_sheets = manipulate_consolidate_data('data/BalanceSheets')
     consolidated_balance_sheets.to_excel('wrangling/Consolidated_BalanceSheet_Data.xlsx',index=False)
     print('consolidated balance sheets completed')
@@ -169,6 +196,17 @@ def wrap_up_consolidating_financials():
 
 
 def create_machine_learning_data():
+    '''INPUT
+    nothing 
+    OUTPUT 
+    combines data from time series, balance sheets, cash flow statements, income statements, previously created by previous 
+    definitions. 
+    then drops some columns not particularly useful for this data set like cik, HQ location, sub industry, etc. 
+    Since we're only dealing with 500, some categories can get very thin. 
+    
+    Next we add the financial ratios, using definitions from the corporate financial institute (see the file in the reference folder)
+    Finally it saves the output from all of this as our machine learning input data. 
+    '''
     quarters =['2022Q2','2022Q3','2022Q4','2023Q1','2023Q2','2023Q3'] 
     sequence = {'2022Q2':0
                 ,'2022Q3':1
@@ -202,7 +240,7 @@ def create_machine_learning_data():
     #drop irrelevant columns
     mldata = mldata.drop(columns=['security','gics_sub_industry','cik','reportedCurrency','hq_location','date_added','founded'],axis=1)
 
-    #using a new df avoids a highly fragmented dataframe which gives a performance warning otherwise. So creating a ratios df concatting
+    #using a new df avoids a highly fragmented dataframe which gives a performance warning otherwise. So creating a ratios df then concatinating
     ratios = pd.DataFrame()
     ratios['current_ratio'] = mldata['totalCurrentAssets']/mldata['totalCurrentLiabilities']
     ratios['acid_test_ratio']=(mldata['totalCurrentAssets']-mldata['inventory'])/mldata['totalCurrentLiabilities']
