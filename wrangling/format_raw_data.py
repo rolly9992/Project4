@@ -71,6 +71,7 @@ def create_time_series_data():
                 df = pd.read_csv(f'{directory}/{tempfile}',sep=',')
                 startdate = df['date'].min()
                 enddate = df['date'].max()
+                #filtering to ONLY include end of quarter dates for rolling 62 adjusted close prices
                 df = df[df['date'].isin(dates)]
                 df['sequence']=df['date'].map(sequence)
                 df['quarter'] = pd.PeriodIndex(df.date, freq='Q')
@@ -121,7 +122,7 @@ def manipulate_consolidate_data(directory):
     '''INPUT
     directory
     OUTPUT 
-    this definition can be used to consolidate each of the financial statement types
+    this function is used consolidate each of the financial statement types
     (balance sheets, income statements and cash flow statements)
     It orders by quarter, fills in missing data dedupes if more than 1 statement per quarter. 
     Then filters for only the 6 quarters we are looking at. 
@@ -134,39 +135,37 @@ def manipulate_consolidate_data(directory):
     for i in range(len(dlist)):
         try:
             tempfile = dlist[i:i+1][0]
-            #print(tempfile)
+            
             df = pd.read_csv(f'{directory}/{tempfile}',sep='|')
             df=df.sort_values('fiscalDateEnding',ascending=True)
             
             
             #interpolate data if any nulls that are between ordered rows with data
             df = df.interpolate(method='linear', limit_direction='forward', axis=0)
-            #if rows in the ordered beginning of a column are blank, use these 
+            #if rows in the ordered beginning of a column are blank, use bfill 
             df = df.bfill()    
-            #finally if any nulls at the end 
+            #finally if any nulls at the end use ffill 
             df = df.ffill()
             
             #fiscalDateEnding in all 3 financial pieces: Balance Sheets, Cash Flows and Income Statements. 
-            #note, I'm using a cutoff about 1 year before to give higher odds to be able to interpolate instead of front or back fill
             df = df[df['fiscalDateEnding']>'2021-06-30']
-            #this is redundant 
+            
             df.fillna(0,inplace=True)
             df['quarter'] = pd.PeriodIndex(df.fiscalDateEnding, freq='Q')
                
-            # Sort the DataFrame by 'ID', 'Quarter', and 'Date' in descending order
             df = df.sort_values(by=['ticker', 'quarter', 'fiscalDateEnding'], ascending=[True, True, False])
 
             # Drop duplicates, keeping the latest fiscalDateEnding  
             df = df.drop_duplicates(subset=['ticker', 'quarter'], keep='last')
 
-            #in case the above doesn't take care of the same ticker in the same quarter (not seeing how it would fail, but... )
+            #backup just in case... perhaps overkill... 
             #applying the function created above to look for 2 items from the same ticker in the same quarter and keep one with more data
             df['row_non_blank_count'] = df.apply(calculate_non_blank_columns_in_row, axis=1)
-
             df = df.sort_values(by=['ticker', 'fiscalDateEnding','row_non_blank_count'], ascending=[True, True, False])
             df = df.drop_duplicates(subset=['ticker', 'fiscalDateEnding'], keep='first')  # Keep first (the more complete one)
             df = df.drop('row_non_blank_count',axis=1)  # Keep first (the more complete one)
             l.append(df)
+            
         except Exception as e:
             print('exception of ',e)
             errorlist.append(tempfile)
@@ -240,7 +239,8 @@ def create_machine_learning_data():
     #drop irrelevant columns
     mldata = mldata.drop(columns=['security','gics_sub_industry','cik','reportedCurrency','hq_location','date_added','founded'],axis=1)
 
-    #using a new df avoids a highly fragmented dataframe which gives a performance warning otherwise. So creating a ratios df then concatinating
+    #ADDING STANDARD FINANCIAL RATIOS USING DEFINITIONS FROM THE CORPORATE FINANCIAL INSTITUTE
+    #NOTE: using a new df avoids a highly fragmented dataframe which gives a performance warning otherwise. So creating a ratios df then concatenating
     ratios = pd.DataFrame()
     ratios['current_ratio'] = mldata['totalCurrentAssets']/mldata['totalCurrentLiabilities']
     ratios['acid_test_ratio']=(mldata['totalCurrentAssets']-mldata['inventory'])/mldata['totalCurrentLiabilities']
@@ -272,7 +272,7 @@ def create_machine_learning_data():
     mldata = mldata.merge(ts,on=['ticker','sequence'],how='inner')
     mldata = mldata[mldata['sequence']!=5] #5 is the endpoint. we have all we need from this from a training/testing perspective
     mldata =mldata.drop('SPYreturn',axis=1) #we will use this, but not directly in the ML 
-    mldata =mldata.drop('quarter',axis=1) #no further use
+    mldata =mldata.drop('quarter',axis=1) #no further use as we'll be using sequences instead. Less clunky.
     mldata = mldata.set_index('ticker')
     mldata.to_excel('model/ml_data.xlsx')
     print('machine learning dataset created')

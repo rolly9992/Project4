@@ -1,0 +1,13 @@
+fiscalDateEnding|reportedCurrency|operatingCashflow|paymentsForOperatingActivities|proceedsFromOperatingActivities|changeInOperatingLiabilities|changeInOperatingAssets|depreciationDepletionAndAmortization|capitalExpenditures|changeInReceivables|changeInInventory|profitLoss|cashflowFromInvestment|cashflowFromFinancing|proceedsFromRepaymentsOfShortTermDebt|paymentsForRepurchaseOfCommonStock|paymentsForRepurchaseOfEquity|paymentsForRepurchaseOfPreferredStock|dividendPayout|dividendPayoutCommonStock|dividendPayoutPreferredStock|proceedsFromIssuanceOfCommonStock|proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet|proceedsFromIssuanceOfPreferredStock|proceedsFromRepurchaseOfEquity|proceedsFromSaleOfTreasuryStock|changeInCashAndCashEquivalents|changeInExchangeRate|netIncome|ticker
+2024-12-31|USD|219000000|||||150000000|127000000||-33000000|||-104000000|||||||||||||||31000000|SOLV
+2024-09-30|USD|169000000|||||133000000|93000000||-42000000|||-202000000|||||||||||||||122000000|SOLV
+2024-06-30|USD|355000000|||||133000000|58000000||-5000000|||-396000000|||||||||||||||89000000|SOLV
+2024-03-31|USD|442000000|||||139000000|102000000||-52000000|||462000000|||||||||||||||237000000|SOLV
+2023-12-31|USD|547000000|||||139000000|88000000||30000000|||-306000000|||||||||||||||272000000|SOLV
+2023-09-30|USD|493000000|||||144000000|66000000||-2000000|||-485000000|||||||||||||||460000000|SOLV
+2023-06-30|USD|366000000|||||133000000|71000000||1000000|||-299000000|||||||||||||||321000000|SOLV
+2023-03-31|USD|509000000|||||145000000|65000000||-6000000|||-462000000|||||||||||||||293000000|SOLV
+2022-12-31||446000000|||||151000000|82000000||57000000|||-356000000|||||||||||||||307000000|SOLV
+2022-09-30||496000000|||||142000000|57000000||-29000000|||-455000000|||||||||||||||335000000|SOLV
+2022-06-30||368500000|||||142500000|56000000||-55000000|||-324500000|||||||||||||||350500000|SOLV
+2022-03-31||368500000|||||142500000|56000000||-55000000|||-324500000|||||||||||||||350500000|SOLV

@@ -1,4 +1,4 @@
-
+#TODO add second round. AV sometimes might have issues with a particular ticker then later ok. 
 import sqlite3
 import numpy as np 
 import pandas as pd
@@ -11,8 +11,6 @@ import requests
 from alpha_vantage.timeseries import TimeSeries
 from alpha_vantage.techindicators import TechIndicators
 import os 
-#print(os.getcwd())
-#from custdefs import custdefs as cd
 from pandas.core.common import flatten
 import requests 
 import sys 
@@ -58,16 +56,20 @@ def get_SandP_List():
     df.index.name = 'ticker'
     df.to_excel('data/sp500_tickerlist.xlsx')
     print('SPY list pulled and saved')
+    tl = df.index
+    tl = list(set(tl))
+    return tl
 
 
 
-def pull_adjusted_time_series(key,pull_type):
+def pull_adjusted_time_series(key,pull_type,tickerlist):
     dir_ts = "data/TimeSeriesAdjusted"
     os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
     
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
-    tl = df['ticker']
-    tl = list(set(tl))
+    tl = tickerlist
+    #tl = df['ticker']
+    #tl = list(set(tl))
 
  
     if pull_type == 'full':
@@ -83,25 +85,13 @@ def pull_adjusted_time_series(key,pull_type):
                 '8. split coefficient':'split coefficient'
                 }
 
-    #df = pd.read_excel('data/sp500_tickerlist.xlsx')
-    tl = df['ticker']
 
     countcheck = len(tl)
     print('pulling ',countpull,' tickers')
-    # dates = ['2022-06-30','2022-09-30','2022-12-30','2023-03-31','2023-06-30']
-    # sequence = {'2022-06-30':0
-    #             ,'2022-09-30':1
-    #             ,'2022-12-30':2
-    #             ,'2023-03-31':3
-    #             ,'2023-06-30':4 }
-
     errorlist = []
-    #errorfilesave = []
-
 
     l_meta=[]
-    for i in range(0,countpull): #len(tl)): #-1,-1,-1):
-        #start = time.time() 
+    for i in range(0,countpull):
         time.sleep(.3)
     
         try:
@@ -129,7 +119,7 @@ def pull_adjusted_time_series(key,pull_type):
             df_stock.to_csv('data/TimeSeriesAdjusted/TS_for_' + ticker + '.csv')
 
         except Exception as e:
-            errorlist.append((i,ticker))
+            errorlist.append(ticker)
             print(i,ticker)    
             print('this is the error: ',e)
             continue
@@ -137,15 +127,17 @@ def pull_adjusted_time_series(key,pull_type):
     #print('errorlist:',errorlist)
     df_meta=pd.concat(l_meta)
     df_meta.to_excel('data/ts_meta_check.xlsx')
-
+    return errorlist
 
 ##pulling BALANCE sheets
-def pull_Balance_Sheets(key,pull_type):
-    dir_ts = "data/BalanceSheets"
-    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
-    #start = time.time()  
+def pull_Balance_Sheets(key,pull_type,tickerlist):
+    dir_bs = "data/BalanceSheets"
+    if not os.path.exists("data/BalanceSheets"):
+        os.makedirs("data/BalanceSheets") 
+      
+    
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
-    tl = df['ticker']
+    tl = tickerlist
     if pull_type == 'full':
         countpull = len(tl)
     else:
@@ -172,29 +164,32 @@ def pull_Balance_Sheets(key,pull_type):
                 temp=pd.DataFrame([x])
                 temp=temp.replace('None',np.nan)
                 temp['ticker']=ticker            
-                l.append(temp) #.from_dict(quarterly[0],index=[0])
+                l.append(temp) 
             df=pd.concat(l)
             df.to_csv(f'data/BalanceSheets/AV_BS_{ticker}.csv',sep='|',index=None)
         except Exception as e:
-            errorlist.append(tl[i])
-            print(e)
-            pass
+            if tl[i]=='SPY':
+                pass
+            else:
+                errorlist.append(tl[i])
             
     if len(errorlist)>0:
-        print('the following tickers did not pull data')
+        print('the following tickers did not pull balance sheet data:')
         print(errorlist)
     else:
         print('all balance sheets pulled')
-    
+    return errorlist    
 
 
 ###CASHFLOW STATEMENTS
-def pull_Cashflow_Statements(key,pull_type):
-    dir_ts = "data/CashFlowStatements"
-    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
+def pull_Cashflow_Statements(key,pull_type,tickerlist):
+    dir_cf = "data/CashFlowStatements"
+    if not os.path.exists("data/CashFlowStatements"):
+        os.makedirs("data/CashFlowStatements") 
+      
       
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
-    tl = df['ticker']
+    tl = tickerlist 
 
     if pull_type == 'full':
         countpull = len(tl)
@@ -206,7 +201,7 @@ def pull_Cashflow_Statements(key,pull_type):
     errorlist = []
 
     for i in range(0,countpull): 
-        #print(i) 
+    
         time.sleep(.3)
         try:
             ticker=tl[i]
@@ -229,24 +224,28 @@ def pull_Cashflow_Statements(key,pull_type):
             df.to_csv(f'data/CashFlowStatements/AV_CF_{ticker}.csv',sep='|',index=None)
             
         except Exception as e:
-            errorlist.append(tl[i])
-            print('exception of:',e)
+            if tl[i]=='SPY':
+                pass
+            else:
+                errorlist.append(tl[i])
 
             
     if len(errorlist)>0:
-        print('the following tickers did not pull data')
+        print('the following tickers did not pull cash flow statement data:')
         print(errorlist)
     else:
         print('all cash flow statements pulled')
-
+    return errorlist
 
 ###INCOME STATEMENT
-def pull_Income_Statements(key,pull_type):
+def pull_Income_Statements(key,pull_type,tickerlist):
     dir_ts = "data/IncomeStatements"
-    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
-    #start = time.time()  
+    if not os.path.exists("data/IncomeStatements"):
+        os.makedirs("data/IncomeStatements") 
+      
+      
     df = pd.read_excel('data/sp500_tickerlist.xlsx')
-    tl = df['ticker']
+    tl = tickerlist
     if pull_type == 'full':
         countpull = len(tl)
     else:
@@ -260,7 +259,6 @@ def pull_Income_Statements(key,pull_type):
             ticker=tl[i]
             ticker = ticker.replace(' ','')
             ticker = ticker.replace('.','-')
-            # replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
             url = f'https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol={ticker}&apikey={key}'
             r = requests.get(url)
             data = r.json()
@@ -271,40 +269,52 @@ def pull_Income_Statements(key,pull_type):
                 temp=pd.DataFrame([x])
                 temp=temp.replace('None',np.nan)
                 temp['ticker']=ticker
-                l.append(temp) #.from_dict(quarterly[0],index=[0])
+                l.append(temp) 
             df=pd.concat(l)
-            #df.to_csv(f'E:\\AlphaVantage_IncomeStatements\AV_IS_{ticker}.csv',sep='|',index=None)
             df.to_csv(f'data/IncomeStatements/AV_IS_{ticker}.csv',sep='|',index=None)
         except Exception as e:
-            errorlist.append(tl[i])
-            print('exception of:',e)
+            if tl[i]=='SPY':
+                pass
+            else:
+                errorlist.append(tl[i])
+                
 
             
     if len(errorlist)>0:
-        print('the following tickers did not pull data')
+        print('the following tickers did not pull income statement data:')
         print(errorlist)
     else:
         print('all income statements pulled') 
-
+    return errorlist
 
 
 
 def main():
-    #if len(sys.argv) == 4:
-
-    #    messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
     if len(sys.argv) == 3:
-        #todo make option to pull either FULL(500) or SAMPLE(2)
-
         key, pull_type = sys.argv[1:]    
         
         print('Starting data pull.\n ')
-        get_SandP_List()
-        pull_adjusted_time_series(key,pull_type)
-        pull_Balance_Sheets(key,pull_type)
-        pull_Cashflow_Statements(key,pull_type)
-        pull_Income_Statements(key,pull_type)
+        tl = get_SandP_List()
 
+        #NOTE occassionally the AV API misses a ticker here or there. Giving it a second round with missed tickers
+        missed = pull_adjusted_time_series(key,pull_type,tickerlist=tl)
+        if len(missed)>0:
+            pull_adjusted_time_series(key,pull_type,tickerlist=missed)
+               
+        missed = pull_Balance_Sheets(key,pull_type,tickerlist=tl)
+        if len(missed)>0:
+            pull_Balance_Sheets(key,pull_type,tickerlist=missed)
+            
+        missed = pull_Cashflow_Statements(key,pull_type,tickerlist=tl)
+        if len(missed)>0:
+            pull_Cashflow_Statements(key,pull_type,tickerlist=missed)
+        
+        missed = pull_Income_Statements(key,pull_type,tickerlist=tl)
+        if len(missed)>0:
+            pull_Income_Statements(key,pull_type,tickerlist=missed)
+        print('''time series data, income statement, cash flow, balance sheet data pulled. 
+              It is possible that Alpha Vantage does not have data for some tickers, which would be listed above. 
+              ''')
 
     
     else:

@@ -1,0 +1,9 @@
+fiscalDateEnding|reportedCurrency|operatingCashflow|paymentsForOperatingActivities|proceedsFromOperatingActivities|changeInOperatingLiabilities|changeInOperatingAssets|depreciationDepletionAndAmortization|capitalExpenditures|changeInReceivables|changeInInventory|profitLoss|cashflowFromInvestment|cashflowFromFinancing|proceedsFromRepaymentsOfShortTermDebt|paymentsForRepurchaseOfCommonStock|paymentsForRepurchaseOfEquity|paymentsForRepurchaseOfPreferredStock|dividendPayout|dividendPayoutCommonStock|dividendPayoutPreferredStock|proceedsFromIssuanceOfCommonStock|proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet|proceedsFromIssuanceOfPreferredStock|proceedsFromRepurchaseOfEquity|proceedsFromSaleOfTreasuryStock|changeInCashAndCashEquivalents|changeInExchangeRate|netIncome|ticker
+2024-12-31|USD|921000000|1228000000||967000000|257000000|269000000|350000000|1320000000|-510000000|484000000|-175000000|163000000|0||||||||||19000000||||484000000|GEV
+2024-09-30|USD|1127000000|63000000||948000000|707000000|399000000|159000000|654000000|-137000000|-99000000|-114000000|585000000|0||||||||||0||||-96000000|GEV
+2024-06-30|USD|979000000|74000000||1538000000|514000000|254000000|157000000|-374000000|571000000|1280000000|537000000|970000000|0||||||||||50000000||||1294000000|GEV
+2024-03-31|USD|-444000000|61000000||412000000|869000000|251000000|217000000|-303000000|717000000|-106000000|-285000000|1934000000|-23000000||||||||||||||-130000000|GEV
+2023-12-31|USD|1931000000||||||280000000||-811000000|206000000|-257000000|-1064000000|||||||||||||||197000000|GEV
+2023-09-30|USD|233000000||||||181000000||-114000000|-185000000|-36000000|-286000000|||||||||||||||-170000000|GEV
+2023-06-30|USD|-288000000||||||159000000||426000000|-149000000|-400000000|238000000|||||||||||||||-150000000|GEV
+2023-03-31|USD|-690000000||||||124000000||739000000|-346000000|-41000000|704000000|||||||||||||||-315000000|GEV

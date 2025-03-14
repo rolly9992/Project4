@@ -1,11 +1,7 @@
 
 
-#TODO either delete unused defs here OR combine this script with another 
-
 import pandas as pd 
 pd.options.mode.chained_assignment = None
-import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
@@ -17,54 +13,20 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
-#from sklearn.linear_model import LinearRegression
-from sklearn import preprocessing, svm
-#from sklearn.model_selection import cross_validate
-from sklearn.model_selection import GridSearchCV
-from sklearn import metrics
-from sklearn.metrics import mean_squared_error, r2_score, make_scorer
-from sklearn.metrics import max_error, mean_absolute_error, median_absolute_error 
-#import seaborn as sns
-from sklearn import linear_model
 from sklearn.ensemble import VotingClassifier
-
-#from scipy import stats
 pd.options.display.float_format = '{:20,.2f}'.format
 
 
-#TODO for the final eval, pick better models then test them on future months 
-
-
-genericmetricsdf = pd.read_excel('generic_metrics.xlsx')
-featurestestingmetricsdf = pd.read_excel('features_testing_metrics.xlsx')
-# #metricstest_feature_reduction.to_excel('metricstest_feature_reduction.xlsx',index=None)
-all_grid_search_metrics = pd.read_excel('all_grid_search_metrics.xlsx')
-
-
-
-#genericstats = genericmetricsdf.describe()
-genericstats = genericmetricsdf.groupby('sequence')['Precision'].agg(['mean', 'median'])
-
-featurereductionmodelstats = featurestestingmetricsdf.groupby('sequence')['Precision'].agg(['mean', 'median'])
-all_grid_search_stats = all_grid_search_metrics.groupby('sequence')['Precision'].agg(['mean', 'median'])
-
-sidebyside = pd.concat([genericstats,featurereductionmodelstats,all_grid_search_stats],axis=1)
-# = all_grid_search_metrics.groupby('sequence')['Precision'].agg(['mean', 'median'])
-
-
-#####################################################
-###########################################
-
+#PARAMETERS --- put in sys arguments 
+dollar= 10000
+number_of_picks = 5
 
 sequences = [0,1,2,3,4,5]
 
 
-df = pd.read_excel('ml_data.xlsx')
+df = pd.read_excel('model/ml_data.xlsx')
 df = df.set_index('ticker')
 dfm = df[['better_than_spy','return','next_rolling62_adjustedclose','rolling62_adjustedclose','sequence']]
-
-
-
 
 bools = ['gics_sector_Consumer Discretionary', 'gics_sector_Consumer Staples', 
  'gics_sector_Energy', 'gics_sector_Financials', 'gics_sector_Health Care',
@@ -73,26 +35,25 @@ bools = ['gics_sector_Consumer Discretionary', 'gics_sector_Consumer Staples',
 
 
 def spy_returns_by_quarter():
-    #TODO refactor location when running from terminal
-    df = pd.read_excel('../wrangling/Consolidated_TimeSeries_Data.xlsx')
+    '''INPUT
+    nothing
+    OUTPUT 
+    SPY returns by quarter dataframe'''
+    
+    df = pd.read_excel('wrangling/Consolidated_TimeSeries_Data.xlsx')
     spy = df[df['ticker']=='SPY']
-    #startingmoney = starting_money
-    #value = startingmoney
+    
     l = []
-    #skip first and last quarter. 
+    #NOTE skip first and last quarter. 
     #first set of data used as input data for first model. Last is used to test the preceding quarter 
     for i in range(0,5):
         
         
         temp = pd.DataFrame({'sequence':[i],
                             'Spy Return':[spy['return'].iloc[i]]
-                            }
-                            )
+                            } )
         l.append(temp)
     SPY= pd.concat(l,axis=0)
-
-    #print('SPY by quarter:',dfout)
-    #print('SPY overall return:', value/startingmoney-1 )
     return SPY
 SPY = spy_returns_by_quarter()
 
@@ -101,6 +62,11 @@ SPY = spy_returns_by_quarter()
 #### CLASSIFIER DEFINITIONS 
 ################################################################
 def prep_for_classifier(df):
+    '''INPUT
+    raw dataframe 
+    OUTPUT 
+    manipulated dataframe for models to use
+    '''
     df = df[df['sequence']!=5]
 
     #keeping return in ML would mean data leakage. 
@@ -127,8 +93,7 @@ def prep_for_classifier(df):
         l.append(catout)
     dfcat=pd.concat(l,axis=1)
     dfcat=dfcat.drop(columns=cat_vars,axis=1)
-    #print(df.shape)
-    #print(dfcat.shape) #expecting an increase due to adding dummies. 
+     
     cat_cols = dfcat.columns.tolist()
     for i in range(len(cat_cols)):
         dfcat[cat_cols[i]] = dfcat[cat_cols[i]].astype(int)
@@ -229,7 +194,7 @@ def evaluate_classifier_model(model, X_test, Y_test,sequence): #, category_names
     precision=precision_score(Y_test,y_pred,average='weighted',zero_division=1)
     recall=recall_score(Y_test,y_pred,average='weighted')
     f1score = f1_score(Y_test,y_pred,average='weighted')    
-    print('\nscores:')
+    #print('\nscores:')
     metricsout ={ 'test for': ['test'] ,
         'model':[model],
            'sequence':[sequence], 
@@ -237,8 +202,7 @@ def evaluate_classifier_model(model, X_test, Y_test,sequence): #, category_names
                     'Precision':[precision],
                     'Recall':[recall],
                     'F1 Score':[f1score]}
-    #TODO remove print statement. curate into 1 larger df for easy comparison
-    print(metricsout)
+    #print(metricsout)
     metricsout = pd.DataFrame(metricsout)
     return y_probs,y_pred ,metricsout
 
@@ -309,7 +273,6 @@ def evaluate_model(model, X_test, Y_test,sequence): #, category_names=None):
     metricsout = pd.DataFrame(metricsout)
     return metricsout
 
-#TODO refactor 
 def evaluate_model_using_future_data(model,dfin,sequence): #, category_names=None):
     '''INPUT
     the machine learning model we built earlier
@@ -327,8 +290,9 @@ def evaluate_model_using_future_data(model,dfin,sequence): #, category_names=Non
     -the F1 score
         
     '''
+    
     X,y=get_X_y_data_classifier(dfin,sequence=sequence)
-    #NOTE, we are not splitting this into training and testing, but only predicting
+    #NOTE, we are not splitting this into training and testing, but predicting on full set of future data
     y_pred = model.predict(X)
     accuracy=accuracy_score(y,y_pred)
     precision=precision_score(y,y_pred,average='weighted',zero_division=1)
@@ -345,12 +309,10 @@ def evaluate_model_using_future_data(model,dfin,sequence): #, category_names=Non
     return metricsout
 
 
-#if top_n exists, need to include that 
-def predict_data(dfin,model,sequence,top_n):
-    
-    #CLEAN THIS UP 
+def predict_data(dfin,model,sequence):
+       
     X,y=get_X_y_data_classifier(dfin,sequence=sequence)
-    #model.predict(X)
+    #NOTE: not splitting to train/test here as we are testing the entire set of future data
     y_probs,y_pred,metricsout=evaluate_classifier_model(model, X_test=X, Y_test=y,sequence=sequence)
     return y_probs,y_pred
 
@@ -387,34 +349,11 @@ def train_evaluate_generic_models(dfin,sequence):
     
     voter_model = VotingClassifier(estimators=voters)
     voter_model.fit(X_train,y_train)    
-    # # predicting the voter model
-    #pred_generic = voter_model.predict(X_test)
-    
-    #print('evaluate combined generic model')
+
     metricstest_genericCombined = evaluate_model(model=voter_model, X_test=X_test, Y_test=y_test,sequence=sequence)
     metricstest_genericCombined['model']='generic_voter_model' 
     allmodelmetrics = pd.concat([metricstest_generic,metricstest_genericCombined],axis=0)
     return allmodelmetrics
-
-
-generic_models = [RandomForestClassifier(random_state=42),
-       GradientBoostingClassifier(),
-      LogisticRegression(random_state=42),
-      SVC(probability=True),
-      KNeighborsClassifier()     ]
-
-
-#need to use these 
-def train_generic_model(model,X_train,y_train):
-    model.fit(X_train,y_train)
-    return model
-def train_voter_model(voters,X_train,y_train):
-    combined_model = VotingClassifier(estimators=voters)
-    combined_model.fit(X_train,y_train)  
-    return combined_model
-def cross_validate_model_mean(model,X_train,y_train):
-    crossval = (cross_val_score(model, X_train, y_train, cv=5))
-    return crossval.mean()
 
 
 def evaluate_testing_on_future_data(s):
@@ -473,33 +412,27 @@ def get_picks(number_of_picks,s):
     Xpicks = Xpick[:number_of_picks]
     return Xpicks
 
-#this works 
-#TODO need to calculate returns 
-number_of_picks = 5
 picksovertime=[]
 for i in range(4):
     picks =get_picks(number_of_picks,i)
     picksovertime.append(picks)
 allpicks = pd.concat(picksovertime,axis=0)
+allpicks.to_excel('allpicks.xlsx')
 
-dollar= 10000
-number_of_picks = 5 
+
 def calculate_SPY_return(dollar,SPY):
     startingdollar = dollar
     currentdollar = dollar
-    #skipping the first quarter as that is used for initial training. keeps apples to apples
+    #skipping the first sequence/quarter as that is used for initial training. keeps apples to apples
     for i in range(1,5):
         spyreturn = SPY['Spy Return'][SPY['sequence']==i].iloc[0]
         currentdollar = currentdollar * spyreturn + currentdollar
-        #print(spyreturn)
-        #print(currentdollar)
     endingdollar = currentdollar
     totalreturn = endingdollar/startingdollar-1
     print('total SPY return:',totalreturn)
     return endingdollar,totalreturn
-#this works 
-SPYendingdollar,SPYtotalreturn=calculate_SPY_return(dollar,SPY)
 
+SPYendingdollar,SPYtotalreturn=calculate_SPY_return(dollar,SPY)
 
 
 #evaluate individual picks 
@@ -511,7 +444,6 @@ def calculate_individual_stock_picks(dollar,s,number_of_picks):
     getonesequence['endingdollar']= getonesequence['dollar']+getonesequence['dollar'] * getonesequence['return']
     totalendingdollars = getonesequence['endingdollar'].sum()
     totalreturn = totalendingdollars/startingdollar-1
-    #print(s,totalendingdollars,totalreturn,startingdollar )
     return totalendingdollars,totalreturn
 
 def compare_returns(number_of_picks):
@@ -519,7 +451,6 @@ def compare_returns(number_of_picks):
     totalendingdollars,totalreturn=calculate_individual_stock_picks(dollar=totalendingdollars,s=2,number_of_picks=number_of_picks)
     totalendingdollars,totalreturn=calculate_individual_stock_picks(dollar=totalendingdollars,s=3,number_of_picks=number_of_picks)
     totalendingdollars,totalreturn=calculate_individual_stock_picks(dollar=totalendingdollars,s=4,number_of_picks=number_of_picks)
-
     total_return_from_picks = totalendingdollars/dollar-1
     print('total return from picks:',total_return_from_picks)
 
@@ -530,8 +461,13 @@ def compare_returns(number_of_picks):
     print(outcome)
 
 
-compare_returns(number_of_picks=5)
+def main():
+    compare_returns(number_of_picks=5)
+    print('''\nif you would like to see the actual picks, you can look at the following file:
+          allpicks.xlsx''')
 
+if __name__ == '__main__':
+    main()
 
 
 
