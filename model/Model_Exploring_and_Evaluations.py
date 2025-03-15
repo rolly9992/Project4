@@ -1,13 +1,8 @@
 
 
 
-#TODO need to clean up this code
-#TODO delete unncessary commented out code
-#TODO incorporate cross val avgs in output... 
-
 import pandas as pd 
 pd.options.mode.chained_assignment = None
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
@@ -19,15 +14,11 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
-from sklearn import preprocessing, svm
 from sklearn.model_selection import GridSearchCV
-from sklearn import metrics
-from sklearn.metrics import mean_squared_error, r2_score, make_scorer
-from sklearn.metrics import max_error, mean_absolute_error, median_absolute_error 
-from sklearn import linear_model
+from sklearn.metrics import make_scorer
 from sklearn.ensemble import VotingClassifier
 pd.options.display.float_format = '{:20,.2f}'.format
-import sys 
+#import sys 
 
 
 df = pd.read_excel('model/ml_data.xlsx')
@@ -315,7 +306,7 @@ def implement_different_feature_number_model_metrics(dfin):
     '''INPUT
     dataframe 
     OUTPUT 
-    important features 
+    dataframe of important features by rank
     '''
     
     l = []
@@ -365,7 +356,8 @@ def easy_loop(a):
     '''INPUT
     None
     OUTPUT
-    a list of generic models to train in a future function and dictionary of grid parameter choices with numbers
+    a list of generic models to train in a future function and dictionary of 
+    grid parameter choices with numbers
     '''
     generic_models = [  GradientBoostingClassifier(),
         RandomForestClassifier(random_state=42),
@@ -379,6 +371,13 @@ def easy_loop(a):
 
 
 def do_grid_search(model,parameters,sequence):
+    '''INPUT 
+    model
+    parameter grid
+    sequence (quarter) number
+    OUTPUT
+    metrics of fitted grid models
+    '''
     X,y=get_X_y_data_classifier(dfin,sequence=sequence)
     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=.20,random_state=42,shuffle=True)
     precision_scorer = make_scorer(precision_score, zero_division=0) 

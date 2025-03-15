@@ -1,22 +1,13 @@
 
 
 
-from alpha_vantage.timeseries import TimeSeries
-from alpha_vantage.techindicators import TechIndicators
 
 import pandas as pd 
 pd.options.mode.copy_on_write = True 
 import numpy as np 
-import time
 import os 
-print(os.getcwd())
-import requests 
-from pandas.core.common import flatten
-import json
-import sys 
-import requests 
-from pandas.core.common import flatten
-#NOTE: the pandas interpolate method was deprecated in python 3.12 however it reappeared in 3.13. And it works in 3.11 which is what I'm using. 
+#NOTE: the pandas interpolate method was deprecated in python 3.12 however it reappeared in 3.13. 
+#And it works fine in 3.11 which is what I'm using. 
 #for this reason I am supressing the futures warning 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)

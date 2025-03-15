@@ -1,28 +1,25 @@
-#TODO add second round. AV sometimes might have issues with a particular ticker then later ok. 
-import sqlite3
+
+ 
+
 import numpy as np 
 import pandas as pd
 pd.set_option('future.no_silent_downcasting', True)
-
 import time 
-#getting the list https://stackoverflow.com/questions/44232578/get-the-sp-500-tickers-list
 import sys 
 import requests
 from alpha_vantage.timeseries import TimeSeries
-from alpha_vantage.techindicators import TechIndicators
-import os 
-from pandas.core.common import flatten
-import requests 
-import sys 
-from datetime import date
-from datetime import datetime as dt
-from dateutil.relativedelta import relativedelta, FR
 import os 
 
 
 
+#NOTE getting the list https://stackoverflow.com/questions/44232578/get-the-sp-500-tickers-list
 def get_SandP_List():
-        
+    '''INPUT 
+    Nothing 
+    OUTPUT 
+    pulls latest list of S&P 500 from wikipedia to then use a a list of tickers to 
+    pull data on 
+    '''    
     def list_wikipedia_sp500() -> pd.DataFrame:
         # Ref: https://stackoverflow.com/a/75845569/
         url = 'https://en.m.wikipedia.org/wiki/List_of_S%26P_500_companies'
@@ -63,13 +60,23 @@ def get_SandP_List():
 
 
 def pull_adjusted_time_series(key,pull_type,tickerlist):
-    dir_ts = "data/TimeSeriesAdjusted"
-    os.makedirs(os.path.dirname(dir_ts), exist_ok=True)  
+    '''
+    INPUT 
+    key - the alpha vantage password
+    pull type either full (all data) or sample (2 files only for speed)
+    tickerlist - the output of the previous definition
+    OUTPUT  
+    pulls individual adjusted time series data on the ticker list 
+    and stores in a TimeSeries subdirectory
+    '''
+
+
+    #dir_ts = "data/TimeSeriesAdjusted"
+    if not os.path.exists("data/TimeSeriesAdjusted"):
+        os.makedirs("data/TimeSeriesAdjusted") 
+     
     
-    df = pd.read_excel('data/sp500_tickerlist.xlsx')
     tl = tickerlist
-    #tl = df['ticker']
-    #tl = list(set(tl))
 
  
     if pull_type == 'full':
@@ -86,7 +93,7 @@ def pull_adjusted_time_series(key,pull_type,tickerlist):
                 }
 
 
-    countcheck = len(tl)
+    #countcheck = len(tl)
     print('pulling ',countpull,' tickers')
     errorlist = []
 
@@ -131,7 +138,18 @@ def pull_adjusted_time_series(key,pull_type,tickerlist):
 
 ##pulling BALANCE sheets
 def pull_Balance_Sheets(key,pull_type,tickerlist):
-    dir_bs = "data/BalanceSheets"
+    '''
+    INPUT 
+    key - the alpha vantage password
+    pull type either full (all data) or sample (2 files only for speed)
+    tickerlist - the output of the previous definition
+    OUTPUT  
+    pulls individual Balance Sheet data on the ticker list 
+    and stores in a BalanceSheet subdirectory
+    '''
+    
+    
+    #dir_bs = "data/BalanceSheets"
     if not os.path.exists("data/BalanceSheets"):
         os.makedirs("data/BalanceSheets") 
       
@@ -183,7 +201,17 @@ def pull_Balance_Sheets(key,pull_type,tickerlist):
 
 ###CASHFLOW STATEMENTS
 def pull_Cashflow_Statements(key,pull_type,tickerlist):
-    dir_cf = "data/CashFlowStatements"
+    '''
+    INPUT 
+    key - the alpha vantage password
+    pull type either full (all data) or sample (2 files only for speed)
+    tickerlist - the output of the previous definition
+    OUTPUT  
+    pulls individual CashFlow Sheet data on the ticker list 
+    and stores in a CashFlow Sheet subdirectory
+    '''
+    
+    #dir_cf = "data/CashFlowStatements"
     if not os.path.exists("data/CashFlowStatements"):
         os.makedirs("data/CashFlowStatements") 
       
@@ -223,7 +251,8 @@ def pull_Cashflow_Statements(key,pull_type,tickerlist):
 
             df.to_csv(f'data/CashFlowStatements/AV_CF_{ticker}.csv',sep='|',index=None)
             
-        except Exception as e:
+        except Exception:
+            #the SPY itself won't have financial statements. 
             if tl[i]=='SPY':
                 pass
             else:
@@ -239,7 +268,17 @@ def pull_Cashflow_Statements(key,pull_type,tickerlist):
 
 ###INCOME STATEMENT
 def pull_Income_Statements(key,pull_type,tickerlist):
-    dir_ts = "data/IncomeStatements"
+    '''
+    INPUT 
+    key - the alpha vantage password
+    pull type either full (all data) or sample (2 files only for speed)
+    tickerlist - the output of the previous definition
+    OUTPUT  
+    pulls individual Income Statement data on the ticker list 
+    and stores in a Income Statement subdirectory
+    '''
+    
+    #dir_ts = "data/IncomeStatements"
     if not os.path.exists("data/IncomeStatements"):
         os.makedirs("data/IncomeStatements") 
       
@@ -272,7 +311,7 @@ def pull_Income_Statements(key,pull_type,tickerlist):
                 l.append(temp) 
             df=pd.concat(l)
             df.to_csv(f'data/IncomeStatements/AV_IS_{ticker}.csv',sep='|',index=None)
-        except Exception as e:
+        except Exception:
             if tl[i]=='SPY':
                 pass
             else:
@@ -313,14 +352,15 @@ def main():
         if len(missed)>0:
             pull_Income_Statements(key,pull_type,tickerlist=missed)
         print('''time series data, income statement, cash flow, balance sheet data pulled. 
-              It is possible that Alpha Vantage does not have data for some tickers, which would be listed above. 
+              \nNOTE: It is possible that Alpha Vantage does not have data for some tickers.
+              Any such exceptions would be listed in the above attempts. 
               ''')
 
     
     else:
         print('Please provide the AlphaVantage Password followed by either the word full or sample'\
               'full will pull the entire set of S*P 500 companies. '\
-              'sample will pull 2 companies for a fast examination of the data ' )
+              'sample will pull 2 companies for a fast pull to verify that the code works ' )
 
 
 if __name__ == '__main__':

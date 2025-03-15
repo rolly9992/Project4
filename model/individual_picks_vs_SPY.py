@@ -319,9 +319,9 @@ def predict_data(dfin,model,sequence):
 
 generic_models = [RandomForestClassifier(random_state=42),
        GradientBoostingClassifier(),
-      LogisticRegression(random_state=42),
-      SVC(probability=True),
-      KNeighborsClassifier()     ]
+       LogisticRegression(random_state=42),
+       SVC(probability=True),
+       KNeighborsClassifier()     ]
 
 
 #only need to do this once. 
@@ -394,7 +394,8 @@ def evaluate_testing_on_future_data(s):
                                    sequenceprobs[type(generic_models[1]).__name__]+
                                    sequenceprobs[type(generic_models[2]).__name__]+
                                    sequenceprobs[type(generic_models[3]).__name__]+
-                                   sequenceprobs[type(generic_models[4]).__name__])/5
+                                   sequenceprobs[type(generic_models[4]).__name__]
+                                   )/4
 
     future_curated_evals= pd.concat(future_evals,axis=0)
     future_curated_evals.reset_index(inplace=True)
