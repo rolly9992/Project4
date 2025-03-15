@@ -71,9 +71,6 @@ matplotlib-inline==0.1.6
 mccabe==0.7.0
 mdurl==0.1.0
 mistune==2.0.4
-mkl_fft==1.3.11
-mkl_random==1.2.8
-mkl-service==2.4.0
 more-itertools==10.3.0
 multidict==6.1.0
 mypy-extensions==1.0.0
@@ -184,7 +181,6 @@ whatthepatch==1.0.2
 wheel==0.45.1
 wrapt==1.17.0
 wurlitzer==3.0.2
-xgboost==2.1.4
 yapf==0.40.2
 yarl==1.18.0
 zipp==3.21.0
