@@ -189,7 +189,7 @@ python wrangling/format_raw_data.py
 In the terminal type: 
 
 <pre>
-python Model_Exploring_and_Evaluations.py
+python model/Model_Exploring_and_Evaluations.py
 </pre>
 
 12) Finally, we run the individual_picks_vs_SPY.py
@@ -197,7 +197,7 @@ python Model_Exploring_and_Evaluations.py
 in the terminal type:
 
 <pre>
-python individual_picks_vs_SPY.py  
+python model/individual_picks_vs_SPY.py  
 </pre>
 
 
