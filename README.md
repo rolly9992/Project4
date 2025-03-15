@@ -1,7 +1,14 @@
 # Data Science Project #4 – SPY vs SPY comparing investing directly in the SPY vs picking individual stocks that make up the SPY.
 
 
+## Description of the project 
+
+
+This project started as a friendly arguement with a coworker about how to invest for retirement. He thought investing in the SPY was a good idea since you'll get market returns. I thought perhaps people should look into individual stocks, particularly those that make up the SPY since those stocks are driving the SPY. Some would do better than others right? This project aimed to find out if it was possible to create an algorithm using standard financial statement data on a quarterly basis, along with quarterly rolling average prices. Would picking individual stocks do better or worse than the SPY as far as quarterly returns go? 
+
+
 ## The Dataset
+
 
 For this project, I am pulling data from Alpha Vantage. 
 While there is a free tier, it is limited to only 25 pulls per day. To pull the entire data set, there is a $50 per month charge. So to pull everything you’d have to sign up for at least 1 month. 
@@ -12,6 +19,7 @@ Their website is here: :https://www.alphavantage.co/
 
 
 ## Acknowledgements
+
  
 I used multiple references in this project, some snippets from stack overflow, the alpha vantage website for snippets on pulling data in python, the corporate financial institute for their definitions of ratios, along with some other sources. The full list of references is located in the following file located in this repository: 
 
@@ -21,12 +29,15 @@ Project4/references/Sources.txt
 
 ## Motivation
 
+
 The motivation for this study was to fill a requirement for a Udacity course. A secondary reason was that I had personal interest to see if there was any value in attempting to pick individual stocks on a quarterly basis using an algorithm. Perhaps it could help over the long term with saving for retirement. 
 
 
 ## Files Used
 
+
 There are quite a few files and directories in for this project. These are outlined by folder name, then files are subcategories under the directory. Important note: there are several output files in Excel format. 
+
 
 A) The data folder 
 	
@@ -54,7 +65,8 @@ A) The data folder
 
 
 B) wrangling folder 
-	
+
+ 
  	format_raw_data.py – this script takes all the data pulled in the data folder and consolidates it into quarterly data, add interactive fields, filling in NULL values and prepping for machine learning. 
 
 	Consolidate_BalanceSheet_Data.xlsx – an output file from the above script. 
@@ -66,8 +78,9 @@ B) wrangling folder
 	Consolidate_TimeSeries_Data.xlsx – the final interim output file from the format_raw_data.py script
 
 
-C) model directory
-	
+C) Model directory
+
+ 
 	1) .ipynb checkpoints
 	these are automatically saved files. I left them alone
 	
@@ -118,7 +131,8 @@ requests,
 sklearn,
 sys,
 time,
-warnings
+warnings,
+also note I used both Jupyter Notebooks and Spyder for research and development, both of which required downloads (in the requirements.txt file)
 
 
 
@@ -132,7 +146,7 @@ For a detailed analysis of the set up and implementation of this project, please
 
 ## Steps to run this code on your computer 
 
-1) download this repo to your local computer
+1) Download this repo to your local computer
 
 2) Extract the data from this repo to a folder. Name the folder whatever you like. For the instructions, I'm naming my folder Project4
 
@@ -176,7 +190,7 @@ In the terminal type:
 python data/pull_data.py MyAlphaVantagePassword sample
 </pre>
 
-10) next, we run a script to consolidate the data and make input data for machine learning
+10) Next, we run a script to consolidate the data and make input data for machine learning
 
 In the terminal type: 
 
@@ -184,7 +198,7 @@ In the terminal type:
 python wrangling/format_raw_data.py
 </pre>
 
-11) now we run the input data through various groups of classification models: 5 generic models with no modifications, then models with feature reduction, then we do grid searching on these. For each, the precisions are printed out in the terminal. Typically, I found the generic set did better than either models with feature reduction or models with grid searching.
+11) Now we run the input data through various groups of classification models: 5 generic models with no modifications, then models with feature reduction, then we do grid searching on these. For each, the precisions are printed out in the terminal. Typically, I found the generic set did better than either models with feature reduction or models with grid searching.
 
 In the terminal type: 
 
@@ -199,8 +213,6 @@ in the terminal type:
 <pre>
 python model/individual_picks_vs_SPY.py  
 </pre>
-
-
 
 
 
