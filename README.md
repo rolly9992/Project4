@@ -139,7 +139,7 @@ also note I used both Jupyter Notebooks and Spyder for research and development,
 
 ## Method 
 
-For a detailed analysis of the set up and implementation of this project, please see the following technical paper in this repository called “Project 4 Technical Paper” 
+For a detailed analysis of the set up and implementation of this project, please see the following technical paper in this repository called “Project 4 Technical Paper.pdf” 
 
 
 
