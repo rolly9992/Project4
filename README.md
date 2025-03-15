@@ -173,7 +173,7 @@ Choice 2 pull only 2 tickers for each type of data
 In the terminal type:
 
 <pre>
-python data/pull_data.py MyAlphaVantagePassword full 
+python data/pull_data.py MyAlphaVantagePassword sample
 </pre>
 
 10) next, we run a script to consolidate the data and make input data for machine learning
