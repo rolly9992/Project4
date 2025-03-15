@@ -1,5 +1,5 @@
 fiscalDateEnding|reportedCurrency|operatingCashflow|paymentsForOperatingActivities|proceedsFromOperatingActivities|changeInOperatingLiabilities|changeInOperatingAssets|depreciationDepletionAndAmortization|capitalExpenditures|changeInReceivables|changeInInventory|profitLoss|cashflowFromInvestment|cashflowFromFinancing|proceedsFromRepaymentsOfShortTermDebt|paymentsForRepurchaseOfCommonStock|paymentsForRepurchaseOfEquity|paymentsForRepurchaseOfPreferredStock|dividendPayout|dividendPayoutCommonStock|dividendPayoutPreferredStock|proceedsFromIssuanceOfCommonStock|proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet|proceedsFromIssuanceOfPreferredStock|proceedsFromRepurchaseOfEquity|proceedsFromSaleOfTreasuryStock|changeInCashAndCashEquivalents|changeInExchangeRate|netIncome|ticker
-2024-12-31||781000000|||||593000000|569000000||-58000000|||-262000000|||||157000000|157000000|||||||||146000000|SW
+2024-12-31|USD|781000000|||||593000000|569000000||-58000000|||-262000000|||||157000000|157000000|||||0||||146000000|SW
 2024-09-30|USD|258833621|||||482636322|644594400||140000000|||777965590|||||158000000|158000000|||||2183157||||-176117037|SW
 2024-06-30|USD|384728703|||||310200106|164928600||-20142864|||2399015115|||||337392973|337392973|||||-27192865||||325307255|SW
 2024-03-31|USD|||||||0||||||||||||||||||||191000000|SW
