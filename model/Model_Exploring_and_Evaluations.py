@@ -187,7 +187,7 @@ def evaluate_model(model, X_test, Y_test,sequence): #, category_names=None):
     metricsout ={ 'test for': ['test'] ,
         'model':[model],
            'sequence':[sequence], 
-           'Accurancy':[accuracy],
+           'Accuracy':[accuracy],
                     'Precision':[precision],
                     'Recall':[recall],
                     'F1 Score':[f1score]}
@@ -455,7 +455,7 @@ def evaluate_model_using_future_data(model,dfin,sequence): #, category_names=Non
     metricsout ={ 'test for': ['future data'] ,
         'model':[model],
            'sequence':[sequence], 
-           'Accurancy':[accuracy],
+           'Accuracy':[accuracy],
                     'Precision':[precision],
                     'Recall':[recall],
                     'F1 Score':[f1score]}
