@@ -173,7 +173,7 @@ For a detailed analysis of the set up and implementation of this project, please
 8) Please enter the following to install the requirements.txt file: 
 
 <pre>
-	conda install --yes --file requirements.txt
+	pip install --yes --file requirements.txt
 </pre>
 
 9) Now we can run the first script. You will need an AlphaVantage password as one of the input system arguments. You also have a choice to pull full data (all tickers that currently make up the S&P 500) or sample data (pulls only the first 2 tickers for each type of data). 
