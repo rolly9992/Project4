@@ -108,6 +108,8 @@ C) Model directory
 	individual_picks_vs_SPY.py – the final script that does some backtesting. What would have happened if we picked 5 stocks based on the algorithm (with no human interfering). How would it have done? There is
  	a shuffle function in the models used here so there is some variation in the outcome. 
 
+  	output_metrics_to_tables.ipynb - a jupyter notebook used to create tables of output metrics for the various sets of models used. 
+
 
 Individual files in the main directory
 
